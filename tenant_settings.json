@@ -1,0 +1,10 @@
+[
+    {
+        "id": 1,
+        "include_id": "crmscript_fetcher",
+        "key": "yourUniqueKeyHere",
+        "local_directory": "C:/My directory",
+        "tenant_name": "Example tenant",
+        "url": "https://online.superoffice.com/CustXXXXX/CS"
+    }
+]
