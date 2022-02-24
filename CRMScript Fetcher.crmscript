@@ -1,0 +1,70 @@
+%EJSCRIPT_START%
+<%
+// CRMScript Fetcher by Espen Steen
+#setLanguageLevel 3;
+JSONBuilder jb;
+
+Void getScriptFoldersJson()
+{
+  SearchEngine se;
+  se.addField("hierarchy.id");
+  se.addField("hierarchy.name");
+  se.addField("hierarchy.fullname");
+  se.addField("hierarchy.domain");
+  se.addField("hierarchy.parent_id");
+  se.addCriteria("hierarchy.domain", "Equals", "3");
+  se.addOrder("hierarchy.parent_id", True);
+  se.addOrder("hierarchy.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,name:String,fullname:String,domain:Integer,parent_id:Integer", "script_folders");
+}
+
+Void getScriptsJson()
+{
+  SearchEngine se;
+  se.addField("ejscript.id");
+  se.addField("ejscript.hierarchy_id");
+  se.addField("ejscript.description");
+  se.addField("ejscript.unique_identifier");
+  se.addField("ejscript.registered");
+  se.addField("ejscript.registered_associate_id");
+  se.addField("ejscript.updated");
+  se.addField("ejscript.updated_associate_id");
+  se.addField("ejscript.include_id");
+  se.addField("ejscript.access_key");
+  se.addField("ejscript.body");
+  se.addOrder("ejscript.hierarchy_id", True);
+  se.addOrder("ejscript.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,hierarchy_id:Integer,description:String,unique_identifier:String,registered:String,registered_associate_id:Integer,updated:String,updated_associate_id:Integer,include_id:String,access_key:String,body:String", "scripts");
+}
+
+Void getTriggersJson()
+{
+  SearchEngine se;
+  se.addField("screen_chooser.id");
+  se.addField("screen_chooser.screen_type");
+  se.addField("screen_chooser.description");
+  se.addField("screen_chooser.enabled");
+  se.addField("screen_chooser.unique_identifier");
+  se.addField("screen_chooser.registered");
+  se.addField("screen_chooser.registered_associate_id");
+  se.addField("screen_chooser.updated");
+  se.addField("screen_chooser.updated_associate_id");
+  se.addField("screen_chooser.ejscript");
+  se.addCriteria("screen_chooser.screen_target", "Equals", "-1");
+  se.executeToJSONBuilder(jb, "id:Integer,screen_type:Integer,description:String,enabled:Integer,unique_identifier:String,registered:String,registered_associate_id:Integer,updated:String,updated_associate_id:Integer,body:String", "triggers");
+}
+
+String getDataToJson()
+{
+  jb.pushObject("");
+  jb.setPrettyPrint(4);
+  getScriptFoldersJson();
+  getScriptsJson();
+  getTriggersJson();
+  jb.finalize();
+  Return jb.getString();
+}
+
+print(getDataToJson());
+%>
+%EJSCRIPT_END%
