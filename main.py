@@ -189,9 +189,9 @@ class SuperOfficeData:
             else:
                 self.data = data
 
-    # Main fetch function that puts CRMScripts based on JSON file retrieved from given SuperOffice tenant
+    # Main fetch function
     # Returns true if CRMScripts were fetched and folders/files were created successfully
-    # Will delete Scripts and Trigger Folders before rebuilding them from the JSON again
+    # Will delete all files/folders before recreating them from the JSON again
     # A backup temp folder is created in case script fails during execution
     def fetch(self, tenant):
         self.script_url = f"{tenant.get('url')}/scripts/customer.fcgi?action=safeParse" \
