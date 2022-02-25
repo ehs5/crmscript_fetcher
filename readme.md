@@ -30,11 +30,11 @@ All responsibility of the usage of CRMSCript Fetcher lies on you.
 > 
 > However, files/folders within the root directory will not be deleted, so you can put stuff there safely.
 
-It is also worth noting that, technically, all files and folders within the Scripts and Triggers folders will be deleted and recreated
+Technically, all files and folders within the Scripts and Triggers folders will be deleted and recreated
 every time you click fetch, even if you have done no changes in SuperOffice. 
 
 It is up to you to consider if this poses any problems for your usage. 
-Based on my own usage, git will not detect these deletes/rewrites as changes.
+Based on my own usage though, Git will not detect these deletes and rewrites as changes.
 
 #### About the temp backup folder
 Each fetch will create a "temp" folder where your current local Scripts/Triggers
