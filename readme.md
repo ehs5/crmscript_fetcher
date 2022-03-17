@@ -53,7 +53,7 @@ errors. Usually this works itself out by running the fetch again.
 
 
 - A local PC running Windows
-  - Tested on Windows 11 only. Probably works on earlier versions of Windows as well. Just haven't tried it.
+  - Tested on Windows 10 and 11 only.
 
 ## Getting Started
 
