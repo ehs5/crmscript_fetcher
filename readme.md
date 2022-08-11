@@ -64,14 +64,15 @@ errors. Usually this works itself out by running the fetch again.
 
 ## How to use
 
-1. Open CRMScript Fetcher.crmscript in a text editor, and copy the contents.
+1. Run CRMScript Fetcher.exe
 
 
-2. In your SuperOffice installation, create a new script and paste the contents.
+2. Click the "Copy Fetcher script to clipboard" button.
+Alternatively, open "CRMScript Fetcher.crmscript" in a text editor, and copy the contents from there.
+
+
+3. In your SuperOffice installation, create a new script and paste the contents.
 Give it an include name (e.g. "crmscript_fetcher") and a secret key (or just use the one generated).
-
-
-3. Run CRMScript Fetcher.exe.
 
 
 4. Click "Add tenant"
