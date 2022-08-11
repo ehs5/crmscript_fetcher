@@ -3,6 +3,7 @@
 CRMScript Fetcher is a GUI tool that can download CRMScripts from your 
 SuperOffice installations, and create the scripts as files within a 
 folder structure on your local PC.
+ ![alt text](https://repository-images.githubusercontent.com/463300828/47a6dff7-5790-4a8a-982e-48a918f0a431)
 
 ## About
 
