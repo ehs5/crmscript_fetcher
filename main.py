@@ -6,7 +6,7 @@ import time
 import requests
 
 
-# METHODS FOR HANDLING LOCAL FOLDERS AND FILES
+# FUNCTIONS FOR HANDLING LOCAL FOLDERS AND FILES
 def create_folder(path):
     try:
         os.mkdir(path)
@@ -160,47 +160,21 @@ class TenantSettingsJson:
 
 # Used for getting Json from SuperOffice and performing the fetch itself
 class SuperOfficeData:
-    def __init__(self):
-        self.script_url = ""
+    def __init__(self, tenant):
+        self.tenant = tenant
+        self.script_url = f"{self.tenant.get('url')}/scripts/customer.fcgi?action=safeParse" \
+                          f"&includeId={self.tenant.get('include_id')}" \
+                          f"&key={self.tenant.get('key')}"
         self.data = {}
-
-    # Gets json from SuperOffice. Make sure script_url is set through fetch() first.
-    def get_json_from_superoffice(self):
-        try:
-            response = requests.get(self.script_url)
-        except requests.HTTPError as e:
-            print(f"Could not get data from SuperOffice: {e}")
-        except requests.ReadTimeout as e:
-            print(f"Could not get data from SuperOffice: {e}")
-        except requests.Timeout as e:
-            print(f"Could not get data from SuperOffice: {e}")
-        except requests.TooManyRedirects as e:
-            print(f"Could not get data from SuperOffice: {e}")
-        except requests.ConnectionError as e:
-            print(f"Could not get data from SuperOffice: {e}")
-        except requests.RequestException as e:
-            print(f"Could not get data from SuperOffice: {e}")
-        else:
-            try:
-                data = json.loads(response.text)
-                print("JSON fetched!")
-            except json.JSONDecodeError:
-                print("Invalid json file")
-            else:
-                self.data = data
 
     # Main fetch function
     # Returns true if CRMScripts were fetched and folders/files were created successfully
     # Will delete all files/folders before recreating them from the JSON again
     # A backup temp folder is created in case script fails during execution
-    def fetch(self, tenant):
-        self.script_url = f"{tenant.get('url')}/scripts/customer.fcgi?action=safeParse" \
-                          f"&includeId={tenant.get('include_id')}" \
-                          f"&key={tenant.get('key')}"
-
-        temp_directory = f"{tenant.get('local_directory')}/temp"
-        scripts_directory = f"{tenant.get('local_directory')}/Scripts"
-        triggers_directory = f"{tenant.get('local_directory')}/Triggers"
+    def fetch(self):
+        temp_directory = f"{self.tenant.get('local_directory')}/temp"
+        scripts_directory = f"{self.tenant.get('local_directory')}/Scripts"
+        triggers_directory = f"{self.tenant.get('local_directory')}/Triggers"
 
         print(f"Getting JSON data from SuperOffice using endpoint: {self.script_url}")
         self.get_json_from_superoffice()
@@ -225,3 +199,28 @@ class SuperOfficeData:
             delete_temp_folder(temp_directory)
 
             return True
+
+    # Gets json from SuperOffice
+    def get_json_from_superoffice(self):
+        try:
+            response = requests.get(self.script_url)
+        except requests.HTTPError as e:
+            print(f"Could not get data from SuperOffice: {e}")
+        except requests.ReadTimeout as e:
+            print(f"Could not get data from SuperOffice: {e}")
+        except requests.Timeout as e:
+            print(f"Could not get data from SuperOffice: {e}")
+        except requests.TooManyRedirects as e:
+            print(f"Could not get data from SuperOffice: {e}")
+        except requests.ConnectionError as e:
+            print(f"Could not get data from SuperOffice: {e}")
+        except requests.RequestException as e:
+            print(f"Could not get data from SuperOffice: {e}")
+        else:
+            try:
+                data = json.loads(response.text)
+                print("JSON fetched!")
+            except json.JSONDecodeError:
+                print("Invalid json file")
+            else:
+                self.data = data

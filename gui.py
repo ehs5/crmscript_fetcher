@@ -1,13 +1,16 @@
-import subprocess
 from tkinter import *
+import tkinter as tk
+from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
-from tkinter import ttk
-
+import sv_ttk
+import subprocess
 import main
 
+global app
 
-# BUTTON ACTIONS
+
+# ON CLICK BUTTON ACTIONS
 def button_folder_browse():
     directory = filedialog.askdirectory()
     if directory:
@@ -22,11 +25,11 @@ def tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
     message = "Could not save tenant:\n"
 
     if tenant_name == "":
-        message = message + "\n• Tenant name cannot be empty"
+        message = message + "\n- Tenant name cannot be empty"
         tenant_is_valid = False
 
     if ts.local_directory_already_used_by_tenant(tenant_id, local_directory):
-        message = message + "\n• The local directory is already used by another tenant."
+        message = message + "\n- The local directory is already used by another tenant."
         tenant_is_valid = False
 
     if tenant_is_valid:
@@ -34,7 +37,7 @@ def tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
     messagebox.showerror("Error", message)
 
 
-def button_save():
+def click_button_save():
     # Tenant must have a name, and local directly can't be used for another tenant. More validations are done at fetch.
     tenant_id = get_selected_tenant_in_tree().get("id")
     tenant_name = e_tenant_name.get()
@@ -62,12 +65,12 @@ def button_save():
         tenant_settings_buttons_normal_state()
 
 
-def button_reset():
+def click_button_reset():
     tenant = get_selected_tenant_in_tree()
     load_tenant_settings_to_gui(tenant)
 
     # Disable save/reset buttons
-    button_save.configure(state=DISABLED, background="#F0F0F0", foreground="black")
+    button_save.configure(state=DISABLED)
     button_reset.configure(state=DISABLED)
 
     # Activate fetch/file explorer buttons
@@ -76,7 +79,7 @@ def button_reset():
     print("Changes reset")
 
 
-def button_add_tenant():
+def click_button_add_tenant():
     ts = main.TenantSettingsJson()
     new_tenant = ts.add_tenant_to_json()
 
@@ -87,7 +90,7 @@ def button_add_tenant():
     print("Tenant added")
 
 
-def button_delete_tenant():
+def click_button_delete_tenant():
     ts = main.TenantSettingsJson()
     if ts.get_no_of_tenants_in_json() > 1:
         if messagebox.askquestion("Delete tenant",
@@ -106,7 +109,7 @@ def button_delete_tenant():
                             "Consider changing the values of the selected tenant instead.")
 
 
-def button_fetch():
+def click_button_fetch():
     tenant = get_selected_tenant_in_tree()
     if tenant_is_valid_for_fetch(tenant):
         if messagebox.askquestion("Fetch CRMScripts",
@@ -115,23 +118,35 @@ def button_fetch():
                                   "that are not present in Superoffice will be deleted.\n\n"
                                   "Do you want to continue?") == "yes":
 
-            so_data = main.SuperOfficeData()
-            if so_data.fetch(tenant):
+            so_data = main.SuperOfficeData(tenant)
+            if so_data.fetch():
                 messagebox.showinfo("Success", "CRMScripts fetched successfully!")
             else:
                 messagebox.showerror("Error", "Could not fetch from CRMScripts from tenant.")
 
 
-def button_open_file_explorer():
+def click_button_open_file_explorer():
     local_directory = get_selected_tenant_in_tree().get("local_directory").replace("/", "\\")
     subprocess.Popen(f'explorer "{local_directory}"')
     print(f"Opened folder in File Explorer: {local_directory}")
 
 
+def click_button_copy_fetcher_script():
+    try:
+        with open("CRMScript Fetcher.crmscript") as f:
+            app.clipboard_clear()
+            app.clipboard_append(f.read())
+    except FileNotFoundError:
+        messagebox.showerror("Could not copy fetcher script to clipboard",
+                             "Could not find the fetcher script."
+                             " The script must be in this app's root folder"
+                             " with the name \"CRMScript Fetcher.crmscript\".")
+
+
 # OTHER FUNCTIONS
 # Disables save/reset buttons and activates fetch/file explorer buttons
 def tenant_settings_buttons_normal_state():
-    button_save.configure(state=DISABLED, background="#F0F0F0", foreground="black")
+    button_save.configure(state=DISABLED, style="TButton")
     button_reset.configure(state=DISABLED)
     button_fetch.configure(state=NORMAL)
     button_open_file_explorer.configure(state=NORMAL)
@@ -143,8 +158,6 @@ def get_selected_tenant_in_tree():
     if len(values) > 0:
         tenant_id = values[1]
         return ts.get_tenant_by_id(tenant_id)
-    else:
-        return None
 
 
 def tenant_is_valid_for_fetch(tenant):
@@ -152,19 +165,19 @@ def tenant_is_valid_for_fetch(tenant):
     message = "Can not fetch CRMScripts because tenant settings are invalid:\n"
 
     if tenant.get("include_id") == "":
-        message = message + "\n• Script include ID cannot be empty"
+        message = message + "\n- Script include ID cannot be empty"
         tenant_is_valid = False
 
     if tenant.get("key") == "":
-        message = message + "\n• Script key cannot be empty"
+        message = message + "\n- Script key cannot be empty"
         tenant_is_valid = False
 
     if tenant.get("url") == "":
-        message = message + "\n• SuperOffice Service URL cannot be empty"
+        message = message + "\n- SuperOffice Service URL cannot be empty"
         tenant_is_valid = False
 
     if tenant.get("local_directory") == "":
-        message = message + "\n• Local directory path cannot be empty"
+        message = message + "\n- Local directory path cannot be empty"
         tenant_is_valid = False
 
     if tenant_is_valid:
@@ -186,9 +199,9 @@ def tree_click(event):
     tenant_settings_buttons_normal_state()
 
 
-# Callback when having changed settings of a tenant
+# Callback when having changed settings of a tenant, turns button clickable
 def tenant_settings_changed(event):
-    button_save.configure(state=NORMAL, background="#1FAA59", foreground="white")
+    button_save.configure(state=NORMAL, style="Accent.TButton")
     button_reset.configure(state=NORMAL)
 
     # Disable fetch and file explorer buttons to make sure user don't try to fetch/open from unsaved changes
@@ -227,155 +240,262 @@ def tree_load_tenants():
         tree.insert("", "end", values=(t.get("tenant_name"), t.get("id")), tags="cb")
 
 
-# DEFINITION OF GUI STARTS HERE
-root = Tk()
-root.title("CRMScript Fetcher")
-root.minsize(width=900, height=400)
-root.iconbitmap("icon.ico")
+# Navbar column, top
+class NavBarListFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
 
-# FRAMES
-# Frame: Main
-frame_main = LabelFrame(root, text="CRMScript Fetcher")
-frame_main.pack(side=LEFT, fill=BOTH)
+    def create_widgets(self):
+        # Treeview
+        global tree
+        tree = ttk.Treeview(self,
+                            selectmode="browse",
+                            columns=("1", "2"),
+                            show="headings",
+                            displaycolumns="1",
+                            height=11
+                            )
 
-# Frame: Left column - Tenants navbar
-frame_list_box = LabelFrame(frame_main, padx=5, pady=5)
-frame_list_box.pack(side=LEFT, anchor="n", fill=Y)
+        # tree.grid(column=0, row=0)
+        tree.pack(expand=True, fill="both", side="left")
+        tree.column("1", anchor='w')
+        tree.column("2")
+        tree.heading("1", text="--Tenants--")
+        tree.heading("2", text="id")
 
-# Frame: Left column - Tenants navbar (top)
-frame_tenants_navbar = LabelFrame(frame_list_box)
-frame_tenants_navbar.pack(side=TOP, fill=Y)
+        # Scrollbar
+        tree_scrollbar = ttk.Scrollbar(self, orient="vertical", command=tree.yview)
+        # tree_scrollbar.grid(column=1, row=0, rowspan="2", sticky="nsw")
+        tree_scrollbar.pack(side="right", fill="y")
+        tree.configure(yscrollcommand=tree_scrollbar.set)
 
-# Frame: Left column - List box buttons (bottom)
-frame_list_box_buttons = LabelFrame(frame_list_box)
-frame_list_box_buttons.pack(side=BOTTOM, fill=Y, anchor="w")
-
-# Frame: Right column - Main content
-frame_content = LabelFrame(frame_main, padx=5, pady=5)
-frame_content.pack(side=RIGHT, anchor="n", fill=BOTH)
-
-# Frame: Right column - Tenant content (top)
-frame_content_tenant_settings = LabelFrame(frame_content)
-frame_content_tenant_settings.pack(side=TOP, anchor="n")
-
-# Frame: Right column Tenant settings info
-frame_content_tenant_settings_info = LabelFrame(frame_content_tenant_settings, text="Tenant settings")
-frame_content_tenant_settings_info.pack(side=TOP)
-
-# Frame: Right column Tenant settings buttons
-frame_content_tenant_settings_buttons = LabelFrame(frame_content_tenant_settings)
-frame_content_tenant_settings_buttons.pack(side=BOTTOM, anchor="sw")
-
-# Frame: Right column Tenant content (bottom) - fetch button
-frame_content_tenant_bottom = LabelFrame(frame_content)
-frame_content_tenant_bottom.pack(side=BOTTOM, anchor="sw")
-
-# LABELS, ENTRY FIELDS AND BUTTONS
-# Tenant navbar Tree (top)
-tree = ttk.Treeview(frame_tenants_navbar, selectmode="browse")
-tree.pack(side=LEFT, fill=Y)
-tree["columns"] = ("1", "2")
-tree["show"] = "headings"
-tree["displaycolumns"] = "1"
-tree.column("1", width=150, anchor='w')
-tree.column("2")
-tree.heading("1", text="--Tenants--")
-tree.heading("2", text="id")
-
-# Scrollbar
-tree_scrollbar = ttk.Scrollbar(frame_tenants_navbar, orient="vertical", command=tree.yview)
-tree_scrollbar.pack(side=RIGHT, fill=Y)
-tree.configure(yscrollcommand=tree_scrollbar.set)
-
-# Tenant navbar buttons (bottom)
-button_add_tenant = Button(frame_list_box_buttons, text="Add tenant", command=button_add_tenant)
-button_add_tenant.pack(side=LEFT)
-
-button_delete_tenant = Button(frame_list_box_buttons, text="Delete tenant", command=button_delete_tenant)
-button_delete_tenant.pack(side=RIGHT)
-
-# Tenant settings info grid
-# Row 0 - Tenant name
-label_tenant_name = Label(frame_content_tenant_settings_info, text="Tenant name")
-label_tenant_name.grid(row=0, column=0, sticky="w")
-
-e_tenant_name = Entry(frame_content_tenant_settings_info, width=50)
-e_tenant_name.grid(row=0, column=1, sticky="w")
-
-# Row 1 - SuperOffice Service URL
-label_superoffice_url = Label(frame_content_tenant_settings_info, text="SuperOffice Service URL")
-label_superoffice_url.grid(row=1, column=0, sticky="w")
-
-e_superoffice_url = Entry(frame_content_tenant_settings_info, width=50)
-e_superoffice_url.grid(row=1, column=1, sticky="w")
-
-# Row 2 - Script Include ID
-label_include_id = Label(frame_content_tenant_settings_info, text="Script include ID")
-label_include_id.grid(row=2, column=0, sticky="w")
-
-e_include_id = Entry(frame_content_tenant_settings_info, width=50)
-e_include_id.grid(row=2, column=1, sticky="w")
-
-# Row 3 - Script key
-label_key = Label(frame_content_tenant_settings_info, text="Script key")
-label_key.grid(row=3, column=0, sticky="w")
-
-e_key = Entry(frame_content_tenant_settings_info, width=50)
-e_key.grid(row=3, column=1, sticky="w")
-
-# Row 4 - Local directory
-label_local_directory = Label(frame_content_tenant_settings_info, text="Local directory")
-label_local_directory.grid(row=4, column=0, sticky="w")
-
-label_local_directory_path = Label(frame_content_tenant_settings_info)
-label_local_directory_path.grid(row=4, column=1, sticky="w")
-
-button_local_directory = Button(frame_content_tenant_settings_info, text="Browse", command=button_folder_browse)
-button_local_directory.grid(row=4, column=3, sticky="w")
-
-# Tenant save/reset settings buttons
-button_save = Button(frame_content_tenant_settings_buttons, text="Save settings", command=button_save, state=DISABLED)
-button_save.pack(side=LEFT)
-
-button_reset = Button(frame_content_tenant_settings_buttons, text="Reset settings", command=button_reset,
-                      state=DISABLED)
-button_reset.pack(side=RIGHT)
-
-# Tenant fetch / open explorer buttons
-button_fetch = Button(frame_content_tenant_bottom, text="Fetch CRMScripts", command=button_fetch)
-button_fetch.grid(row=0, column=0, sticky="w")
-button_fetch.configure(background="#383CC1", foreground="white")
-
-button_open_file_explorer = Button(frame_content_tenant_bottom, text="Open in File Explorer",
-                                   command=button_open_file_explorer)
-button_open_file_explorer.grid(row=0, column=1, padx=10)
+        # Event binding for treeview
+        tree.tag_bind("<1>", tree_click)
+        tree.bind("<ButtonRelease-1>", tree_click)
 
 
-# EVENT BINDINGS
-# Event when selecting a tenant
-tree.tag_bind("<1>", tree_click)
-tree.bind("<ButtonRelease-1>", tree_click)
+# Navbar column, bottom
+class NavBarButtonsFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
 
-# Event when changing fields
-e_tenant_name.bind('<KeyPress>', tenant_settings_changed)
-e_superoffice_url.bind('<KeyPress>', tenant_settings_changed)
-e_include_id.bind('<KeyPress>', tenant_settings_changed)
-e_key.bind('<KeyPress>', tenant_settings_changed)
-button_local_directory.bind('<ButtonRelease>', tenant_settings_changed)
+    def create_widgets(self):
+        global button_add_tenant
+        add_tenant = ttk.Button(self, text="Add tenant", command=click_button_add_tenant)
+        add_tenant.grid(column=0, row=0)
 
-# FIRST LOAD OF TENANT DATA UPON OPENING CRMSCRIPT FETCHER
-# Load tenants to left side tree (navbar), set focus to first tenant and load its tenant settings
-tree_load_tenants()
-tree_children = tree.get_children()
-if len(tree_children) > 0:
-    child_id = tree_children[0]
+        global button_delete_tenant
+        delete_tenant = ttk.Button(self, text="Delete tenant", command=click_button_delete_tenant)
+        delete_tenant.grid(column=1, row=0, padx=5)
 
-    # Set focus in tree
-    tree.focus(child_id)
-    tree.selection_set(child_id)
 
-    # Load tenant settings for selected tenant
-    selected_tenant = get_selected_tenant_in_tree()
-    load_tenant_settings_to_gui(selected_tenant)
+# Left column, nav bar frame
+class NavBarFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
 
-root.mainloop()
+    def create_widgets(self):
+        label_heading = ttk.Label(self, text="Your tenants", font="Segoe_UI 12 bold")
+        label_heading.grid(column=0, row=0, sticky="nw", ipady=10)
+
+        # Treeview
+        navbar_list_frame = NavBarListFrame(self)
+        navbar_list_frame.grid(column=0, row=1, sticky="nw")
+
+        navbar_buttons_frame = NavBarButtonsFrame(self)
+        navbar_buttons_frame.grid(column=0, row=2, sticky="sw")
+
+
+# Tenant save/reset buttons frame
+class TenantButtonsFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
+
+    def create_widgets(self):
+        global button_save
+        button_save = ttk.Button(self,
+                                 text="Save settings",
+                                 command=click_button_save,
+                                 style="TButton",
+                                 state=DISABLED,)
+
+        button_save.grid(row=6, column=0, sticky="w")
+
+        global button_reset
+        button_reset = ttk.Button(self,
+                                  text="Reset settings",
+                                  command=click_button_reset,
+                                  style="TButton",
+                                  state=DISABLED)
+
+        button_reset.grid(row=6, column=1, sticky="w", padx=5)
+
+
+# Main content frame, top
+class TenantContentFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Row 0 - Heading
+        label_heading = ttk.Label(self, text="Tenant settings", font="Segoe_UI 12 bold")
+        label_heading.grid(column=0, row=0, sticky="w", ipady=10)
+
+        # Row 1 - Tenant name
+        label_tenant_name = ttk.Label(self, text="Tenant name")
+        label_tenant_name.grid(row=1, column=0, sticky="w")
+
+        global e_tenant_name
+        e_tenant_name = ttk.Entry(self, width=50)
+        e_tenant_name.grid(row=1, column=1, sticky="w")
+
+        # Row 2 - SuperOffice Service URL
+        label_superoffice_url = ttk.Label(self, text="SuperOffice Service URL   ")
+        label_superoffice_url.grid(row=2, column=0, sticky="w")
+
+        global e_superoffice_url
+        e_superoffice_url = ttk.Entry(self, width=50)
+        e_superoffice_url.grid(row=2, column=1, sticky="w")
+
+        # Row 3 - Script Include ID
+        label_include_id = ttk.Label(self, text="Script include ID")
+        label_include_id.grid(row=3, column=0, sticky="w")
+
+        global e_include_id
+        e_include_id = ttk.Entry(self, width=50)
+        e_include_id.grid(row=3, column=1, sticky="w")
+
+        # Row 4 - Script key
+        label_key = ttk.Label(self, text="Script key")
+        label_key.grid(row=4, column=0, sticky="w")
+
+        global e_key
+        e_key = ttk.Entry(self, width=50)
+        e_key.grid(row=4, column=1, sticky="w")
+
+        # Row 5 - Local directory
+        label_local_directory = ttk.Label(self, text="Local directory")
+        label_local_directory.grid(row=5, column=0, sticky="w")
+
+        global label_local_directory_path
+        label_local_directory_path = ttk.Label(self)
+        label_local_directory_path.grid(row=5, column=1, sticky="w")
+
+        button_local_directory = ttk.Button(self, text="Browse", command=button_folder_browse, style="TButton")
+        button_local_directory.grid(row=5, column=3, sticky="w", padx=10)
+
+        # Event bindings for entry fields
+        e_tenant_name.bind('<KeyPress>', tenant_settings_changed)
+        e_superoffice_url.bind('<KeyPress>', tenant_settings_changed)
+        e_include_id.bind('<KeyPress>', tenant_settings_changed)
+        e_key.bind('<KeyPress>', tenant_settings_changed)
+        button_local_directory.bind('<ButtonRelease>', tenant_settings_changed)
+
+        # Row 6 - Tenant save/reset settings buttons frame
+        frame_tenant_buttons = TenantButtonsFrame(self)
+        frame_tenant_buttons.grid(row=6, column=0, columnspan=2, sticky="w")
+
+
+# Main content frame, bottom
+class ContentBottomButtons(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
+
+    def create_widgets(self):
+        global button_fetch
+        button_fetch = ttk.Button(self,
+                                  text="Fetch CRMScripts",
+                                  style="Accent.TButton",
+                                  command=click_button_fetch)
+        button_fetch.grid(column=0, row=0)
+
+        global button_open_file_explorer
+        button_open_file_explorer = ttk.Button(self,
+                                               text="Open in File Explorer",
+                                               style="TButton",
+                                               command=click_button_open_file_explorer)
+        button_open_file_explorer.grid(row=0, column=1, padx=5)
+
+        button_copy_fetcher_script = ttk.Button(self,
+                                                text="Copy Fetcher script to clipboard",
+                                                style="TButton",
+                                                command=click_button_copy_fetcher_script)
+
+        spacer = ttk.Label(self, text="")
+        spacer.grid(row=0, column=2, ipadx=50)
+
+        button_copy_fetcher_script.grid(row=0, column=3)
+
+
+# Right column, main content frame
+class ContentFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
+
+    def create_widgets(self):
+        frame_tenant_content = TenantContentFrame(self)
+        frame_tenant_content.grid(column=0, row=0, ipady=51)
+
+        frame_content_bottom_buttons = ContentBottomButtons(self)
+        frame_content_bottom_buttons.grid(column=0, row=1, sticky="sw")
+
+
+# Main frame, provides outer padding as defined in App class
+class MainFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets()
+
+    def create_widgets(self):
+        frame_navbar = NavBarFrame(self)
+        frame_navbar.grid(column=0, row=0, sticky="nw", padx=10, ipadx=5, ipady=5)
+
+        frame_content = ContentFrame(self)
+        frame_content.grid(column=1, row=0, sticky="nw")
+
+
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("CRMScript Fetcher")
+        self.iconbitmap("icon.ico")
+        self.minsize(width=870, height=400)
+        self.resizable(0, 0)
+        sv_ttk.use_light_theme()
+
+        self.create_widgets()
+        self.load_tenants()
+
+    def create_widgets(self):
+        main_frame = MainFrame(self)
+        main_frame.grid(column=0, row=0, padx=10)
+
+    @staticmethod
+    def load_tenants():
+        """Loads all available tenants to left side tree(navbar),
+        sets focus to first tenant and then loads its tenant settings"""
+
+        tree_load_tenants()
+        tree_children = tree.get_children()
+        if len(tree_children) > 0:
+            child_id = tree_children[0]
+
+            # Set focus in tree
+            tree.focus(child_id)
+            tree.selection_set(child_id)
+
+            # Load tenant settings for selected tenant
+            selected_tenant = get_selected_tenant_in_tree()
+            load_tenant_settings_to_gui(selected_tenant)
+
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
