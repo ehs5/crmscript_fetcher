@@ -133,14 +133,19 @@ def click_button_open_file_explorer():
 
 def click_button_copy_fetcher_script():
     try:
-        with open("CRMScript Fetcher.crmscript") as f:
+        with open("crmscript_fetcher.crmscript") as f:
             app.clipboard_clear()
             app.clipboard_append(f.read())
     except FileNotFoundError:
-        messagebox.showerror("Could not copy fetcher script to clipboard",
-                             "Could not find the fetcher script."
-                             " The script must be in this app's root folder"
-                             " with the name \"CRMScript Fetcher.crmscript\".")
+        try:
+            with open("CRMScript Fetcher.crmscript") as f:
+                app.clipboard_clear()
+                app.clipboard_append(f.read())
+        except FileNotFoundError:
+            messagebox.showerror("Could not copy fetcher script to clipboard",
+                                 "Could not find the fetcher script."
+                                 " The script must be in this app's root folder"
+                                 " with the name \"crmscript_fetcher.crmscript\".")
 
 
 # OTHER FUNCTIONS
@@ -321,7 +326,7 @@ class TenantButtonsFrame(ttk.Frame):
                                  text="Save settings",
                                  command=click_button_save,
                                  style="TButton",
-                                 state=DISABLED,)
+                                 state=DISABLED, )
 
         button_save.grid(row=6, column=0, sticky="w")
 
