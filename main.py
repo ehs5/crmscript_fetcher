@@ -163,4 +163,4 @@ class SuperOfficeData:
         fetch_version_handler: dict[int, callable] = {
             1: self.fetch_version_1
         }
-        return fetch_version_handler[1]()
+        return fetch_version_handler[script_version]()
