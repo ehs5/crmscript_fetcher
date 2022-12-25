@@ -28,8 +28,19 @@ def move_folder(src: str, dst: str) -> None:
 
 # Replace characters that are not allowed in Windows folders/files
 def safe_name(text: str) -> str:
-    return text.replace('/', '.').replace('"', "'").replace("\\", "..").replace(":", " - "). \
-        replace("*", "X").replace("<", " Lt ").replace(">", " Gt ").replace("|", "I")
+    replace_chars = [
+        ("/", "."),
+        ('"', "'"),
+        ("\\", ".."),
+        (":", " - "),
+        ("*", "X"),
+        ("<", " Lt "),
+        (">", " Gt "),
+        ("|", "I")
+    ]
+    for chars in replace_chars:
+        text = text.replace(chars[0], chars[1])
+    return text
 
 
 def create_file(directory: str, file_name: str, body: str) -> None:
