@@ -116,19 +116,20 @@ class SuperOfficeData:
             else:
                 self.data = data
 
-    # Main fetch function
-    # Returns true if CRMScripts were fetched and folders/files were created successfully
-    # Will delete all files/folders before recreating them from the JSON again
-    # A backup temp folder is created in case script fails during execution
-    def fetch(self) -> bool | None:
-        temp_directory = f"{self.tenant.get('local_directory')}/temp"
-        scripts_directory = f"{self.tenant.get('local_directory')}/Scripts"
-        triggers_directory = f"{self.tenant.get('local_directory')}/Triggers"
+    # Returns version of fetcher CRMScript from returned JSON
+    def determine_script_version(self) -> int:
+        script_version = self.data.get("script_version")
+        # Version 1 had no script_version key in JSON
+        if not script_version:
+            return 1
+        return script_version
 
-        print(f"Getting JSON data from SuperOffice using endpoint: {self.script_url}")
-        self.get_json_from_superoffice()
-
+    def fetch_version_1(self) -> bool | None:
         if self.data:
+            temp_directory = f"{self.tenant.get('local_directory')}/temp"
+            scripts_directory = f"{self.tenant.get('local_directory')}/Scripts"
+            triggers_directory = f"{self.tenant.get('local_directory')}/Triggers"
+
             print("Trying to delete temp folder in case it was not deleted on previous fetch")
             delete_folder(temp_directory)
 
@@ -148,3 +149,18 @@ class SuperOfficeData:
             delete_folder(temp_directory)
 
             return True
+
+    # Main fetch function
+    # Returns true if CRMScripts were fetched and folders/files were created successfully
+    # Will delete all files/folders before recreating them from the JSON again
+    # A backup temp folder is created in case script fails during execution
+    def fetch(self) -> bool | None:
+        print(f"Getting JSON data from SuperOffice using endpoint: {self.script_url}")
+        self.get_json_from_superoffice()
+
+        # Call different methods depending on what version fetcher script is
+        script_version: int = self.determine_script_version()
+        fetch_version_handler: dict[int, callable] = {
+            1: self.fetch_version_1
+        }
+        return fetch_version_handler[1]()
