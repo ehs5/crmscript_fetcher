@@ -72,7 +72,7 @@ def create_script_folders(directory: str, folders: list[dict], scripts: list[dic
 def create_trigger_files(triggers_directory: str, triggers: list[dict]) -> None:
     for t in triggers:
         description = t.get("description")
-        # Triggers might have empty names. Use ID to avoid adding only 1 file.
+        # Triggers might have empty names. Use ID to avoid adding only 1 file if there are multiple empty names.
         if not description:
             description = f"Unnamed trigger (ID {t.get('unique_identifier')})"
 
