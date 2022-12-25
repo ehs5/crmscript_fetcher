@@ -18,6 +18,7 @@ def safe_name(text: str) -> str:
     ]
     for chars in replace_chars:
         text = text.replace(chars[0], chars[1])
+
     return text
 
 
@@ -70,7 +71,12 @@ def create_script_folders(directory: str, folders: list[dict], scripts: list[dic
 
 def create_trigger_files(triggers_directory: str, triggers: list[dict]) -> None:
     for t in triggers:
-        create_file(triggers_directory, safe_name(t.get("description")), t.get("body"))
+        description = t.get("description")
+        # Triggers might be unnamed in SuperOffice, which is not allowed in Windows
+        if not description:
+            description = f"Unnamed trigger (ID {t.get('unique_identifier')})"
+
+        create_file(triggers_directory, safe_name(description), t.get("body"))
 
 
 def delete_folder(directory: str) -> None:
