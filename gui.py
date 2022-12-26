@@ -1,3 +1,6 @@
+from main import Fetch
+from main import TenantSettingsJson
+
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
@@ -5,7 +8,6 @@ from tkinter import filedialog
 from tkinter import messagebox
 import sv_ttk
 import subprocess
-import main
 
 global app
 
@@ -20,7 +22,7 @@ def button_folder_browse():
 
 
 def tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
-    ts = main.TenantSettingsJson()
+    ts = TenantSettingsJson()
     tenant_is_valid = True
     message = "Could not save tenant:\n"
 
@@ -53,7 +55,7 @@ def click_button_save():
             "url": e_superoffice_url.get()
         }
 
-        ts = main.TenantSettingsJson()
+        ts = TenantSettingsJson()
         ts.update_tenant_in_json(updated_tenant)
 
         # Reload tree in order to reflect any changes in tenant name. Then re-set focus to same tenant.
@@ -80,7 +82,7 @@ def click_button_reset():
 
 
 def click_button_add_tenant():
-    ts = main.TenantSettingsJson()
+    ts = TenantSettingsJson()
     new_tenant = ts.add_tenant_to_json()
 
     tree_load_tenants()
@@ -91,7 +93,7 @@ def click_button_add_tenant():
 
 
 def click_button_delete_tenant():
-    ts = main.TenantSettingsJson()
+    ts = TenantSettingsJson()
     if ts.get_no_of_tenants_in_json() > 1:
         if messagebox.askquestion("Delete tenant",
                                   "You are about to delete the tenant. Are you sure you want to continue?\n\n"
@@ -118,8 +120,8 @@ def click_button_fetch():
                                   "that are not present in Superoffice will be deleted.\n\n"
                                   "Do you want to continue?") == "yes":
 
-            so_data = main.SuperOfficeData(tenant)
-            if so_data.fetch():
+            fetch = Fetch(tenant)
+            if fetch.fetch():
                 messagebox.showinfo("Success", "CRMScripts fetched successfully!")
             else:
                 messagebox.showerror("Error", "Could not fetch from CRMScripts from tenant.")
@@ -158,7 +160,7 @@ def tenant_settings_buttons_normal_state():
 
 
 def get_selected_tenant_in_tree():
-    ts = main.TenantSettingsJson()
+    ts = TenantSettingsJson()
     values = tree.item(tree.selection()).get("values")
     if len(values) > 0:
         tenant_id = values[1]
@@ -240,7 +242,7 @@ def tree_load_tenants():
         tree.delete(child)
 
     # Insert tenants from tenant settings JSON
-    ts = main.TenantSettingsJson()
+    ts = TenantSettingsJson()
     for t in ts.tenant_settings:
         tree.insert("", "end", values=(t.get("tenant_name"), t.get("id")), tags="cb")
 

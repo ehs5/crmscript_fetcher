@@ -1,8 +1,9 @@
 from files_and_folders import create_folder
 from files_and_folders import delete_folder
 from files_and_folders import move_folder
-from files_and_folders import create_script_folders
+from files_and_folders import create_scripts_hierarchy
 from files_and_folders import create_trigger_files
+from files_and_folders import create_screens_hierarchy
 import json
 import requests
 
@@ -82,14 +83,20 @@ class TenantSettingsJson:
             f.write(json.dumps(self.tenant_settings, indent=4))
 
 
-# Used for getting Json from SuperOffice and performing the fetch itself
-class SuperOfficeData:
+# Used for getting JSON from SuperOffice and performing the fetch itself
+class Fetch:
     def __init__(self, tenant):
+        self.json: dict | None = None
         self.tenant = tenant
         self.script_url = f"{self.tenant.get('url')}/scripts/customer.fcgi?action=safeParse" \
                           f"&includeId={self.tenant.get('include_id')}" \
                           f"&key={self.tenant.get('key')}"
-        self.data: dict | None = None
+
+        # Key = Version of fetcher script in SuperOffice. Informs self.fetch() which method to use.
+        self.fetch_methods: dict[int, callable] = {
+            1: self.fetch_v1,
+            2: self.fetch_v2
+        }
 
     # Gets json from SuperOffice
     def get_json_from_superoffice(self) -> None:
@@ -114,18 +121,19 @@ class SuperOfficeData:
             except json.JSONDecodeError:
                 print("Invalid json file")
             else:
-                self.data = data
+                self.json = data
 
     # Returns version of fetcher CRMScript from returned JSON
     def determine_script_version(self) -> int:
-        script_version = self.data.get("script_version")
+        script_version = self.json.get("script_version")
         # Version 1 had no script_version key in JSON
         if not script_version:
             return 1
         return script_version
 
-    def fetch_version_1(self) -> bool | None:
-        if self.data:
+    # Used for fetcher script version 1
+    def fetch_v1(self) -> bool:
+        if self.json:
             temp_directory = f"{self.tenant.get('local_directory')}/temp"
             scripts_directory = f"{self.tenant.get('local_directory')}/Scripts"
             triggers_directory = f"{self.tenant.get('local_directory')}/Triggers"
@@ -141,26 +149,67 @@ class SuperOfficeData:
             print("Creating folders and files from JSON")
             create_folder(scripts_directory)
             create_folder(triggers_directory)
-            create_script_folders(scripts_directory, self.data["script_folders"], self.data["scripts"])
 
-            create_trigger_files(triggers_directory, self.data["triggers"])
+            # Create a dict containing script folders and scripts since this was not a part of script version 1
+            group_scripts = {
+                "script_folders": self.json["script_folders"],
+                "scripts": self.json["scripts"]
+            }
+            create_scripts_hierarchy(scripts_directory, group_scripts)
+            create_trigger_files(triggers_directory, self.json["triggers"])
 
             print("Deleting temp folder")
             delete_folder(temp_directory)
 
             return True
 
+        return False
+
+    # Used for fetcher script version 2
+    def fetch_v2(self) -> bool:
+        if self.json:
+            temp_directory = f"{self.tenant.get('local_directory')}/temp"
+            scripts_directory = f"{self.tenant.get('local_directory')}/Scripts"
+            triggers_directory = f"{self.tenant.get('local_directory')}/Triggers"
+            screens_directory = f"{self.tenant.get('local_directory')}/Screens"
+
+            print("Trying to delete temp folder in case it was not deleted on previous fetch")
+            delete_folder(temp_directory)
+
+            print("Creating temp folder and moving existing folders and scripts to folder")
+            create_folder(temp_directory)
+            move_folder(scripts_directory, temp_directory)
+            move_folder(triggers_directory, temp_directory)
+            move_folder(screens_directory, temp_directory)
+
+            print("Creating folders and files from JSON")
+            create_folder(scripts_directory)
+            create_folder(triggers_directory)
+            create_folder(screens_directory)
+
+            create_scripts_hierarchy(scripts_directory, self.json["group_scripts"])
+            create_trigger_files(triggers_directory, self.json["group_triggers"]["triggers"])
+            create_screens_hierarchy(screens_directory, self.json["group_screens"])
+
+            print("Deleting temp folder")
+            delete_folder(temp_directory)
+
+            return True
+
+        return False
+
     # Main fetch function
     # Returns true if CRMScripts were fetched and folders/files were created successfully
     # Will delete all files/folders before recreating them from the JSON again
     # A backup temp folder is created in case script fails during execution
-    def fetch(self) -> bool | None:
+    def fetch(self) -> bool:
         print(f"Getting JSON data from SuperOffice using endpoint: {self.script_url}")
         self.get_json_from_superoffice()
 
-        # Call different methods depending on what version fetcher script is
+        # Call different fetch methods depending on what version fetcher script in SuperOffice is
         script_version: int = self.determine_script_version()
-        fetch_version_handler: dict[int, callable] = {
-            1: self.fetch_version_1
-        }
-        return fetch_version_handler[script_version]()
+        try:
+            return self.fetch_methods[script_version]()
+        except KeyError:
+            print("Fetcher script version not supported")
+            return False
