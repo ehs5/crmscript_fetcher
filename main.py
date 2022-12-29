@@ -6,6 +6,8 @@ from files_and_folders import create_trigger_files
 from files_and_folders import create_screens_hierarchy
 from files_and_folders import create_screen_chooser_files
 
+from typing import Callable
+from typing import Optional
 import json
 import requests
 
@@ -87,7 +89,7 @@ class TenantSettingsJson:
 # Used for getting JSON from SuperOffice and performing the fetch itself
 class Fetch:
     def __init__(self, tenant: dict):
-        self.json: dict | None = None
+        self.json: Optional[dict] = None
         self.tenant: dict = tenant
         self.script_url = f"{self.tenant.get('url')}/scripts/customer.fcgi?action=safeParse" \
                           f"&includeId={self.tenant.get('include_id')}" \
@@ -202,7 +204,7 @@ class Fetch:
 
         # Call different fetch methods depending on what version fetcher script in SuperOffice is
         script_version: int = self.determine_script_version()
-        creator_method: callable = None
+        creator_method: Optional[Callable] = None
 
         try:
             creator_method = self.creator_methods[script_version]
