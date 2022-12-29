@@ -159,7 +159,7 @@ def tenant_settings_buttons_normal_state():
     button_open_file_explorer.configure(state=NORMAL)
 
 
-def get_selected_tenant_in_tree():
+def get_selected_tenant_in_tree() -> dict | None:
     ts = TenantSettingsJson()
     values = tree.item(tree.selection()).get("values")
     if len(values) > 0:

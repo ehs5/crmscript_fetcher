@@ -1,9 +1,12 @@
 %EJSCRIPT_START%
 <%
+
 // CRMScript Fetcher by Espen Steen
 #setLanguageLevel 3;
 JSONBuilder jb;
+Integer scriptVersion = 2;
 
+// Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
 Void getScriptFoldersJson()
 {
   SearchEngine se;
@@ -54,17 +57,202 @@ Void getTriggersJson()
   se.executeToJSONBuilder(jb, "id:Integer,screen_type:Integer,description:String,enabled:Integer,unique_identifier:String,registered:String,registered_associate_id:Integer,updated:String,updated_associate_id:Integer,body:String", "triggers");
 }
 
+// Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
+Void getScreenFoldersJson()
+{
+  SearchEngine se;
+  se.addField("hierarchy.id");
+  se.addField("hierarchy.name");
+  se.addField("hierarchy.fullname");
+  se.addField("hierarchy.domain");
+  se.addField("hierarchy.parent_id");
+  se.addCriteria("hierarchy.domain", "Equals", "2");
+  se.addOrder("hierarchy.parent_id", True);
+  se.addOrder("hierarchy.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,name:String,fullname:String,domain:Integer,parent_id:Integer", "screen_folders");
+}
+
+Void getScreenDefinitionJson()
+{
+  SearchEngine se;
+  se.addField("screen_definition.id");
+  se.addField("screen_definition.name");
+  se.addField("screen_definition.id_string");
+  se.addField("screen_definition.hierarchy_id");
+  se.addField("screen_definition.screen_key");
+  se.addField("screen_definition.layout_model");
+  se.addField("screen_definition.load_script_body");
+  se.addField("screen_definition.load_post_cgi_script_body");
+  se.addField("screen_definition.load_final_script_body");
+  se.addField("screen_definition.creation_script");
+  se.addField("screen_definition.warn_on_navigate");
+  se.addField("screen_definition.description");
+  se.addField("screen_definition.autosave");
+  se.addOrder("screen_definition.hierarchy_id", True);
+  se.addOrder("screen_definition.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,name:String,id_string:String,hierarchy_id:Integer,screen_key:String,layout_model:String,load_script_body:String,load_post_cgi_script_body:String,load_final_script_body:String,creation_script:String,warn_on_navigate:Boolean,description:String,autosave:Boolean", "screen_definition");
+}
+
+Void getScreenDefinitionActionJson()
+{
+  SearchEngine se;
+  se.addField("screen_definition_action.id");
+  se.addField("screen_definition_action.screen_definition");
+  se.addField("screen_definition_action.button");
+  se.addField("screen_definition_action.ejscript_body");
+  se.addField("screen_definition_action.do_check");
+
+  se.addOrder("screen_definition_action.screen_definition", True);
+  se.addOrder("screen_definition_action.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,screen_definition:Integer,button:String,ejscript_body:String,do_check:Boolean", "screen_definition_action");
+}
+
+Void getScreenDefinitionElementJson()
+{
+  SearchEngine se;
+  se.addField("screen_definition_element.id");
+  se.addField("screen_definition_element.name");
+  se.addField("screen_definition_element.screen_definition");
+  se.addField("screen_definition_element.element_type");
+  se.addField("screen_definition_element.description");
+  se.addField("screen_definition_element.creation_script");
+  se.addField("screen_definition_element.order_pos");
+  se.addField("screen_definition_element.base_table");
+  se.addField("screen_definition_element.hide");
+  se.addOrder("screen_definition_element.screen_definition", True);
+  se.addOrder("screen_definition_element.id", True);
+  se.addCriteria("screen_definition_element.screen_definition", "Gt", "0");
+  se.executeToJSONBuilder(jb, "id:Integer,name:String,screen_definition:Integer,element_type:Integer,description:String,creation_script:String,order_pos:Integer,base_table:String,hide:Boolean", "screen_definition_element");
+}
+
+Void getScreenDefinitionHiddenJson()
+{
+  SearchEngine se;
+  se.addField("screen_definition_hidden.id");
+  se.addField("screen_definition_hidden.screen_definition");
+  se.addField("screen_definition_hidden.variable");
+  se.addOrder("screen_definition_hidden.screen_definition", True);
+  se.addOrder("screen_definition_hidden.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,screen_definition:Integer,variable:String", "screen_definition_hidden");
+}
+
+Void getScreenDefinitionLanguageJson()
+{
+  SearchEngine se;
+  se.addField("screen_definition_language.id");
+  se.addField("screen_definition_language.screen_definition");
+  se.addField("screen_definition_language.language");
+  se.addField("screen_definition_language.variable_name");
+  se.addField("screen_definition_language.variable_value");
+  se.addOrder("screen_definition_language.screen_definition", True);
+  se.executeToJSONBuilder(jb, "id:Integer,screen_definition:Integer,language:String,variable_name:String,variable_value:String", "screen_definition_language");
+}
+
+Void getScreenChoosersJson()
+{
+  SearchEngine se;
+  se.addField("screen_chooser.id");
+  se.addField("screen_chooser.screen_target");
+  se.addField("screen_chooser.screen_type");
+  se.addField("screen_chooser.description");
+  se.addField("screen_chooser.enabled");
+  se.addField("screen_chooser.unique_identifier");
+  se.addField("screen_chooser.registered");
+  se.addField("screen_chooser.registered_associate_id");
+  se.addField("screen_chooser.updated");
+  se.addField("screen_chooser.updated_associate_id");
+  se.addField("screen_chooser.ejscript");
+  se.addCriteria("screen_chooser.screen_target", "Gte", "0");
+  se.executeToJSONBuilder(jb, "id:Integer,screen_target:Integer,screen_type:Integer,description:String,enabled:Integer,unique_identifier:String,registered:String,registered_associate_id:Integer,updated:String,updated_associate_id:Integer,body:String", "screen_choosers");
+}
+
+Void getExtraTablesJson()
+{
+  SearchEngine se;
+  se.addField("extra_tables.id");
+  se.addField("extra_tables.table_name");
+  se.addField("extra_tables.name");
+  se.addField("extra_tables.search_header");
+  se.addField("extra_tables.view_entry_header");
+  se.addField("extra_tables.new_entry_header");
+  se.addField("extra_tables.edit_entry_header");
+  se.addField("extra_tables.hierarchy_id");
+  se.addField("extra_tables.sort_order");
+  se.addField("extra_tables.display_field");
+  se.addField("extra_tables.flags");
+  se.addField("extra_tables.parent_field");
+  se.addField("extra_tables.fullname_field");
+  se.addField("extra_tables.screen_chooser_entry");
+  se.addField("extra_tables.screen_chooser_all");
+  se.addField("extra_tables.screen_chooser_edit");
+  se.addField("extra_tables.description");
+
+  // NOTE: Bug caues description to appear twice. Use key with name "extra_tables.description", not "description"
+  String fields;
+  fields.append("id:Integer,table_name:String,search_header:String,view_entry_header:String,new_entry_header:String,edit_entry_header:String,hierarchy_id:Integer,");
+  fields.append("sort_order:String,display_field:String,flags:Integer,parent_field:String,fullname_field:Integer,screen_chooser_entry:Integer,screen_chooser_all:Integer,screen_chooser_edit:Integer,description:String");
+
+  se.executeToJSONBuilder(jb, fields, "extra_tables");
+}
+
+Void getExtraFieldsJson()
+{
+  SearchEngine se;
+  se.addField("extra_fields.id");
+  se.addField("extra_fields.domain");
+  se.addField("extra_fields.extra_table");
+  se.addField("extra_fields.target_extra_table");
+  se.addField("extra_fields.field_name");
+  se.addField("extra_fields.name");
+  se.addField("extra_fields.default_value");
+  se.addField("extra_fields.type");
+  se.addField("extra_fields.flags");
+  se.addField("extra_fields.order_pos");
+  se.addField("extra_fields.description");
+  se.addOrder("extra_fields.extra_table", True);
+  se.addOrder("extra_fields.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,domain:Integer,extra_table:Integer,target_extra_table:Integer,field_name:String,name:String,default_value:String,type:Integer,flags:Integer,order_pos:Integer,description:String", "extra_fields");
+}
+
+// Create JSON of database data grouped into scripts, triggers and screens
 String getDataToJson()
 {
   jb.pushObject("");
   jb.setPrettyPrint(4);
+  jb.addInteger("script_version", scriptVersion);
+
+  jb.pushObject("group_scripts");
   getScriptFoldersJson();
   getScriptsJson();
+  jb.popLevel();
+
+  jb.pushObject("group_triggers");
   getTriggersJson();
+  jb.popLevel();
+
+  jb.pushObject("group_screens");
+  getScreenFoldersJson();
+  getScreenDefinitionJson();
+  getScreenDefinitionActionJson();
+  getScreenDefinitionElementJson();
+  getScreenDefinitionHiddenJson();
+  getScreenDefinitionLanguageJson();
+  jb.popLevel();
+
+  jb.pushObject("group_screen_choosers");
+  getScreenChoosersJson();
+  jb.popLevel();
+
+  jb.pushObject("group_extra_tables");
+  getExtraTablesJson();
+  getExtraFieldsJson();
+  jb.popLevel();
+
   jb.finalize();
   Return jb.getString();
 }
 
 print(getDataToJson());
+
 %>
 %EJSCRIPT_END%
