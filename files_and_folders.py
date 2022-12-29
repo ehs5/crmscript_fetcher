@@ -2,7 +2,9 @@
 import json
 import os
 import shutil
-import time
+from tenacity import retry
+from tenacity import wait_fixed
+from tenacity import stop_after_attempt
 
 
 # Replace characters that are not allowed in Windows folders/files
@@ -23,6 +25,7 @@ def safe_name(text: str) -> str:
     return text
 
 
+@retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
 def create_folder(path: str) -> None:
     try:
         os.mkdir(path)
@@ -32,6 +35,9 @@ def create_folder(path: str) -> None:
         print(f"Successfully created directory: {path}")
 
 
+# Sometimes throws PermissionError if os module has recently accessed the folder.
+# Usually works after retrying a number of times.
+@retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
 def move_folder(src: str, dst: str) -> None:
     try:
         shutil.move(src, dst)
@@ -42,24 +48,19 @@ def move_folder(src: str, dst: str) -> None:
         move_folder(src, dst)
 
 
+# shutil.rmtree() often throws PermissionError since os module has just accessed the folder.
+# Usually works after retrying a number of times.
+@retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
 def delete_folder(directory: str) -> None:
-    if os.path.isdir(directory):
-        # shutil.rmtree() often throws PermissionError since os module has just accessed the folder.
-        # Usually works after retrying a number of times.
-        print(f"Deleting folder: {directory}")
-        for i in range(1, 11):
-            print(f"Attempt {i}")
-            if i > 5:
-                time.sleep(0.5)
-            try:
-                shutil.rmtree(directory)
-            except PermissionError:
-                continue
-            else:
-                break
+    if not os.path.isdir(directory):
+        return
+
+    print(f"Deleting folder: {directory}")
+    shutil.rmtree(directory)
 
 
 # Creates a file in the given directory. file_name must include file extension.
+@retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
 def create_file(directory: str, file_name: str, body: str) -> None:
     print(f"Creating file: {file_name}")
     full_path: str = f"{directory}/{file_name}"
