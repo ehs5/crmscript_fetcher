@@ -54,10 +54,10 @@ class TenantSettingsJson:
                             'local_directory': ""}
 
         with open(self.tenant_settings_filename, 'r+') as f:
-            data = json.load(f)
-            data.append(new_tenant)
+            tenants: list = json.load(f)
+            tenants.append(new_tenant)
             f.seek(0)
-            json.dump(data, f, indent=4)
+            json.dump(tenants, f, indent=4)
 
         return new_tenant
 
@@ -104,7 +104,7 @@ class Fetch:
     # Gets json from SuperOffice
     def get_json_from_superoffice(self) -> None:
         try:
-            response = requests.get(self.script_url)
+            response = requests.post(self.script_url)
         except requests.HTTPError as e:
             print(f"Could not get data from SuperOffice: {e}")
         except requests.ReadTimeout as e:
@@ -119,7 +119,7 @@ class Fetch:
             print(f"Could not get data from SuperOffice: {e}")
         else:
             try:
-                data = json.loads(response.text)
+                data: dict = json.loads(response.text)
                 print("JSON fetched!")
             except json.JSONDecodeError:
                 print("Invalid json file")
