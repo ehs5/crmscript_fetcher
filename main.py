@@ -86,14 +86,20 @@ class TenantSettingsJson:
             f.write(json.dumps(self.tenant_settings, indent=4))
 
 
-# Used for getting JSON from SuperOffice and performing the fetch itself
+# Used for getting JSON from SuperOffice and performing the fetch + data creation itself
 class Fetch:
     def __init__(self, tenant: dict):
-        self.json: Optional[dict] = None
+        self.fetch_options: dict = {
+            "fetch_scripts": True,
+            "fetch_triggers": True,
+            "fetch_screens": True,
+            "fetch_screen_choosers": True,
+            "fetch_extra_tables": False
+        }
+
+        self.data: Optional[dict] = None
         self.tenant: dict = tenant
-        self.script_url = f"{self.tenant.get('url')}/scripts/customer.fcgi?action=safeParse" \
-                          f"&includeId={self.tenant.get('include_id')}" \
-                          f"&key={self.tenant.get('key')}"
+        self.script_url: str = self.build_script_url()
 
         # Key = Version of fetcher script in SuperOffice. Informs self.fetch() which creator method to use.
         self.creator_methods: dict[int, callable] = {
@@ -101,10 +107,21 @@ class Fetch:
             2: self.creator_v2
         }
 
+    def build_script_url(self) -> str:
+        script_url: str = f"{self.tenant.get('url')}/scripts/customer.fcgi?action=safeParse" \
+                               f"&includeId={self.tenant.get('include_id')}" \
+                               f"&key={self.tenant.get('key')}"
+
+        # Append fetch options to URL
+        for key in self.fetch_options:
+            script_url += f"&{key}={str(self.fetch_options[key])}"
+
+        return script_url
+
     # Gets json from SuperOffice
     def get_json_from_superoffice(self) -> None:
         try:
-            response = requests.post(self.script_url)
+            response = requests.get(self.script_url)
         except requests.HTTPError as e:
             print(f"Could not get data from SuperOffice: {e}")
         except requests.ReadTimeout as e:
@@ -124,11 +141,11 @@ class Fetch:
             except json.JSONDecodeError:
                 print("Invalid json file")
             else:
-                self.json = data
+                self.data = data
 
     # Returns version of fetcher CRMScript from returned JSON
     def determine_script_version(self) -> int:
-        script_version: int = self.json.get("script_version")
+        script_version: int = self.data.get("script_version")
         # Version 1 had no script_version key in JSON
         if not script_version:
             return 1
@@ -153,9 +170,9 @@ class Fetch:
         create_folder(triggers_directory)
 
         # Create a dict containing script folders and scripts since this was not a part of script version 1
-        group_scripts: dict = {"script_folders": self.json["script_folders"], "scripts": self.json["scripts"]}
+        group_scripts: dict = {"script_folders": self.data["script_folders"], "scripts": self.data["scripts"]}
         create_scripts_hierarchy(scripts_directory, group_scripts)
-        create_trigger_files(triggers_directory, self.json["triggers"])
+        create_trigger_files(triggers_directory, self.data["triggers"])
 
         print("Deleting temp folder")
         delete_folder(temp_directory)
@@ -184,10 +201,10 @@ class Fetch:
         create_folder(screens_directory)
         create_folder(screen_choosers_directory)
 
-        create_scripts_hierarchy(scripts_directory, self.json["group_scripts"])
-        create_trigger_files(triggers_directory, self.json["group_triggers"]["triggers"])
-        create_screens_hierarchy(screens_directory, self.json["group_screens"])
-        create_screen_chooser_files(screen_choosers_directory, self.json["group_screen_choosers"]["screen_choosers"])
+        create_scripts_hierarchy(scripts_directory, self.data["group_scripts"])
+        create_trigger_files(triggers_directory, self.data["group_triggers"]["triggers"])
+        create_screens_hierarchy(screens_directory, self.data["group_screens"])
+        create_screen_chooser_files(screen_choosers_directory, self.data["group_screen_choosers"]["screen_choosers"])
 
         print("Deleting temp folder")
         delete_folder(temp_directory)
@@ -199,7 +216,7 @@ class Fetch:
     def fetch(self) -> bool:
         print(f"Getting JSON data from SuperOffice using endpoint: {self.script_url}")
         self.get_json_from_superoffice()
-        if not self.json:
+        if not self.data:
             return False
 
         # Call different fetch methods depending on what version fetcher script in SuperOffice is

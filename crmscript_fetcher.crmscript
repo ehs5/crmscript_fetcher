@@ -90,7 +90,12 @@ Void getScreenDefinitionJson()
   se.addField("screen_definition.autosave");
   se.addOrder("screen_definition.hierarchy_id", True);
   se.addOrder("screen_definition.id", True);
-  se.executeToJSONBuilder(jb, "id:Integer,name:String,id_string:String,hierarchy_id:Integer,screen_key:String,layout_model:String,load_script_body:String,load_post_cgi_script_body:String,load_final_script_body:String,creation_script:String,warn_on_navigate:Boolean,description:String,autosave:Boolean", "screen_definition");
+
+  String fields;
+  fields.append("id:Integer,name:String,id_string:String,hierarchy_id:Integer,screen_key:String,layout_model:String,load_script_body:String,load_post_cgi_script_body:String,");
+  fields.append("load_final_script_body:String,creation_script:String,warn_on_navigate:Boolean,description:String,autosave:Boolean");
+
+  se.executeToJSONBuilder(jb, fields, "screen_definition");
 }
 
 Void getScreenDefinitionActionJson()
@@ -214,45 +219,66 @@ Void getExtraFieldsJson()
   se.executeToJSONBuilder(jb, "id:Integer,domain:Integer,extra_table:Integer,target_extra_table:Integer,field_name:String,name:String,default_value:String,type:Integer,flags:Integer,order_pos:Integer,description:String", "extra_fields");
 }
 
-// Create JSON of database data grouped into scripts, triggers and screens
 String getDataToJson()
 {
+  // Retrieve "fetch options" from query parameters
+  Bool fetchScripts = getCgiVariable("fetch_scripts").toBool();
+  Bool fetchTriggers = getCgiVariable("fetch_triggers").toBool();
+  Bool fetchScreens = getCgiVariable("fetch_screens").toBool();
+  Bool fetchScreenChoosers = getCgiVariable("fetch_screen_choosers").toBool();
+  Bool fetchExtraTables = getCgiVariable("fetch_extra_tables").toBool();
+
+  // Get data from database and create JSON
   jb.pushObject("");
   jb.setPrettyPrint(4);
   jb.addInteger("script_version", scriptVersion);
 
-  jb.pushObject("group_scripts");
-  getScriptFoldersJson();
-  getScriptsJson();
-  jb.popLevel();
+  if (fetchScripts)
+  {
+    jb.pushObject("group_scripts");
+    getScriptFoldersJson();
+    getScriptsJson();
+    jb.popLevel();
+  }
 
-  jb.pushObject("group_triggers");
-  getTriggersJson();
-  jb.popLevel();
+  if (fetchTriggers)
+  {
+    jb.pushObject("group_triggers");
+    getTriggersJson();
+    jb.popLevel();
+  }
 
-  jb.pushObject("group_screens");
-  getScreenFoldersJson();
-  getScreenDefinitionJson();
-  getScreenDefinitionActionJson();
-  getScreenDefinitionElementJson();
-  getScreenDefinitionHiddenJson();
-  getScreenDefinitionLanguageJson();
-  jb.popLevel();
+  if (fetchScreens)
+  {
+    jb.pushObject("group_screens");
+    getScreenFoldersJson();
+    getScreenDefinitionJson();
+    getScreenDefinitionActionJson();
+    getScreenDefinitionElementJson();
+    getScreenDefinitionHiddenJson();
+    getScreenDefinitionLanguageJson();
+    jb.popLevel();
+  }
 
-  jb.pushObject("group_screen_choosers");
-  getScreenChoosersJson();
-  jb.popLevel();
+  if (fetchScreenChoosers)
+  {
+    jb.pushObject("group_screen_choosers");
+    getScreenChoosersJson();
+    jb.popLevel();
+  }
 
-  jb.pushObject("group_extra_tables");
-  getExtraTablesJson();
-  getExtraFieldsJson();
-  jb.popLevel();
+  if (fetchExtraTables)
+  {
+    jb.pushObject("group_extra_tables");
+    getExtraTablesJson();
+    getExtraFieldsJson();
+    jb.popLevel();
+  }
 
   jb.finalize();
-  Return jb.getString();
+  return jb.getString();
 }
 
 print(getDataToJson());
-
 %>
 %EJSCRIPT_END%
