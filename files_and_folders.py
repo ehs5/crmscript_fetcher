@@ -25,7 +25,6 @@ def safe_name(text: str) -> str:
     return text
 
 
-@retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
 def create_folder(path: str) -> None:
     try:
         os.mkdir(path)
@@ -60,7 +59,6 @@ def delete_folder(directory: str) -> None:
 
 
 # Creates a file in the given directory. file_name must include file extension.
-@retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
 def create_file(directory: str, file_name: str, body: str) -> None:
     print(f"Creating file: {file_name}")
     full_path: str = f"{directory}/{file_name}"
