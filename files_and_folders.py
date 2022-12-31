@@ -90,11 +90,23 @@ def create_scripts_hierarchy(directory: str, group_scripts: dict, lookup_parent_
             create_scripts_hierarchy(path, group_scripts, folder_id)  # Recursively creates child folders
 
 
+# Creates a screen elements json file including item_config data
+def create_screen_elements(screen_id: int, screen_path: str, screen_def_element: list[dict], item_config: list[dict]):
+    screen_elements: list[dict] = [se for se in screen_def_element if se.get("screen_definition") == screen_id]
+
+    # Add list of all item configs for each element
+    for element in screen_elements:
+        element["item_config"]: list[dict] = [ic for ic in item_config if ic.get("item_id") == element.get("id")]
+
+    create_file(screen_path, "screen_definition_element.json", json.dumps(screen_elements, indent=4))
+
+
 # For each screen, creates a folder containing .crmscript and .json files
 def create_screen_folders(directory: str, folder_id: int, group_screens: dict) -> None:
     screen_defs: list[dict] = group_screens["screen_definition"]
     screen_actions: list[dict] = group_screens["screen_definition_action"]
     screen_def_element: list[dict] = group_screens["screen_definition_element"]
+    item_config: list[dict] = group_screens["item_config"]
     screen_def_hidden: list[dict] = group_screens["screen_definition_hidden"]
     screen_def_language: list[dict] = group_screens["screen_definition_language"]
 
@@ -140,8 +152,7 @@ def create_screen_folders(directory: str, folder_id: int, group_screens: dict) -
         screen_to_json.pop("creation_script")
         create_file(screen_path, "screen_definition.json", json.dumps(screen_to_json, indent=4))
 
-        screen_elements: list[dict] = [se for se in screen_def_element if se.get("screen_definition") == screen_id]
-        create_file(screen_path, "screen_definition_element.json", json.dumps(screen_elements, indent=4))
+        create_screen_elements(screen_id, screen_path, screen_def_element, item_config)
 
         screen_hidden: list[dict] = [sh for sh in screen_def_hidden if sh.get("screen_definition") == screen_id]
         create_file(screen_path, "screen_definition_hidden.json", json.dumps(screen_hidden, indent=4))
@@ -166,7 +177,7 @@ def create_screens_hierarchy(directory: str, group_screens: dict, lookup_parent_
             create_screens_hierarchy(path, group_screens, folder_id)  # Recursively creates child folders
 
 
-# Creates files of Triggers in local directory
+# Creates .crmscript files of Triggers in local directory
 def create_trigger_files(triggers_directory: str, triggers: list[dict]) -> None:
     for t in triggers:
         description: str = t.get("description")
@@ -177,7 +188,7 @@ def create_trigger_files(triggers_directory: str, triggers: list[dict]) -> None:
         create_file(triggers_directory, f'{safe_name(description)}.crmscript', t.get("body"))
 
 
-# Creates files of ScreenChoosers in local directory
+# Creates .crmscript files of ScreenChoosers in local directory
 def create_screen_chooser_files(screen_choosers_directory: str, screen_choosers: list[dict]) -> None:
     for sc in screen_choosers:
         description: str = sc.get("description")
@@ -186,3 +197,19 @@ def create_screen_chooser_files(screen_choosers_directory: str, screen_choosers:
             description = f"Unnamed ScreenChooser (ID {sc.get('unique_identifier')})"
 
         create_file(screen_choosers_directory, f'{safe_name(description)}.crmscript', sc.get("body"))
+
+
+# Creates JSON files of scheduled tasks in local directory
+def create_scheduled_tasks_files(directory: str, group_scheduled_tasks: dict):
+    scheduled_tasks: list[dict] = group_scheduled_tasks["scheduled_task"]
+    schedules: list[dict] = group_scheduled_tasks["schedule"]
+
+    # Create a JSON of each "scheduled_task" entry also containing corresponding "schedule" entry
+    for task in scheduled_tasks:
+        # Insert schedule entry
+        task["schedule"]: dict = [s for s in schedules if s.get("id") == task.get("schedule_id")][0]
+
+        # Create JSON File
+        schedule_name: str = task["schedule"]["name"]
+        file_name: str = f"{safe_name(schedule_name)}.json"
+        create_file(directory, file_name, json.dumps(task, indent=4))

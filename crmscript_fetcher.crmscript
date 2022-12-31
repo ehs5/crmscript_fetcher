@@ -1,13 +1,12 @@
 %EJSCRIPT_START%
 <%
-
 // CRMScript Fetcher by Espen Steen
 #setLanguageLevel 3;
 JSONBuilder jb;
 Integer scriptVersion = 2;
 
 // Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
-Void getScriptFoldersJson()
+Void getScriptFolders()
 {
   SearchEngine se;
   se.addField("hierarchy.id");
@@ -21,7 +20,7 @@ Void getScriptFoldersJson()
   se.executeToJSONBuilder(jb, "id:Integer,name:String,fullname:String,domain:Integer,parent_id:Integer", "script_folders");
 }
 
-Void getScriptsJson()
+Void getScripts()
 {
   SearchEngine se;
   se.addField("ejscript.id");
@@ -40,7 +39,7 @@ Void getScriptsJson()
   se.executeToJSONBuilder(jb, "id:Integer,hierarchy_id:Integer,description:String,unique_identifier:String,registered:String,registered_associate_id:Integer,updated:String,updated_associate_id:Integer,include_id:String,access_key:String,body:String", "scripts");
 }
 
-Void getTriggersJson()
+Void getTriggers()
 {
   SearchEngine se;
   se.addField("screen_chooser.id");
@@ -58,7 +57,7 @@ Void getTriggersJson()
 }
 
 // Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
-Void getScreenFoldersJson()
+Void getScreenFolders()
 {
   SearchEngine se;
   se.addField("hierarchy.id");
@@ -72,7 +71,7 @@ Void getScreenFoldersJson()
   se.executeToJSONBuilder(jb, "id:Integer,name:String,fullname:String,domain:Integer,parent_id:Integer", "screen_folders");
 }
 
-Void getScreenDefinitionJson()
+Void getScreenDefinition()
 {
   SearchEngine se;
   se.addField("screen_definition.id");
@@ -94,11 +93,10 @@ Void getScreenDefinitionJson()
   String fields;
   fields.append("id:Integer,name:String,id_string:String,hierarchy_id:Integer,screen_key:String,layout_model:String,load_script_body:String,load_post_cgi_script_body:String,");
   fields.append("load_final_script_body:String,creation_script:String,warn_on_navigate:Boolean,description:String,autosave:Boolean");
-
   se.executeToJSONBuilder(jb, fields, "screen_definition");
 }
 
-Void getScreenDefinitionActionJson()
+Void getScreenDefinitionAction()
 {
   SearchEngine se;
   se.addField("screen_definition_action.id");
@@ -106,13 +104,12 @@ Void getScreenDefinitionActionJson()
   se.addField("screen_definition_action.button");
   se.addField("screen_definition_action.ejscript_body");
   se.addField("screen_definition_action.do_check");
-
   se.addOrder("screen_definition_action.screen_definition", True);
   se.addOrder("screen_definition_action.id", True);
   se.executeToJSONBuilder(jb, "id:Integer,screen_definition:Integer,button:String,ejscript_body:String,do_check:Boolean", "screen_definition_action");
 }
 
-Void getScreenDefinitionElementJson()
+Void getScreenDefinitionElement()
 {
   SearchEngine se;
   se.addField("screen_definition_element.id");
@@ -130,7 +127,18 @@ Void getScreenDefinitionElementJson()
   se.executeToJSONBuilder(jb, "id:Integer,name:String,screen_definition:Integer,element_type:Integer,description:String,creation_script:String,order_pos:Integer,base_table:String,hide:Boolean", "screen_definition_element");
 }
 
-Void getScreenDefinitionHiddenJson()
+Void getItemConfig()
+{
+  SearchEngine se;
+  se.addField("item_config.id");
+  se.addField("item_config.domain");
+  se.addField("item_config.item_id");
+  se.addField("item_config.item_name");
+  se.addField("item_config.item_value");
+  se.executeToJSONBuilder(jb, "id:Integer,domain:Integer,item_id:Integer,item_name:String,item_value:String", "item_config");
+}
+
+Void getScreenDefinitionHidden()
 {
   SearchEngine se;
   se.addField("screen_definition_hidden.id");
@@ -141,7 +149,7 @@ Void getScreenDefinitionHiddenJson()
   se.executeToJSONBuilder(jb, "id:Integer,screen_definition:Integer,variable:String", "screen_definition_hidden");
 }
 
-Void getScreenDefinitionLanguageJson()
+Void getScreenDefinitionLanguage()
 {
   SearchEngine se;
   se.addField("screen_definition_language.id");
@@ -153,7 +161,7 @@ Void getScreenDefinitionLanguageJson()
   se.executeToJSONBuilder(jb, "id:Integer,screen_definition:Integer,language:String,variable_name:String,variable_value:String", "screen_definition_language");
 }
 
-Void getScreenChoosersJson()
+Void getScreenChoosers()
 {
   SearchEngine se;
   se.addField("screen_chooser.id");
@@ -171,7 +179,55 @@ Void getScreenChoosersJson()
   se.executeToJSONBuilder(jb, "id:Integer,screen_target:Integer,screen_type:Integer,description:String,enabled:Integer,unique_identifier:String,registered:String,registered_associate_id:Integer,updated:String,updated_associate_id:Integer,body:String", "screen_choosers");
 }
 
-Void getExtraTablesJson()
+Void getScheduledTasks()
+{
+  SearchEngine se;
+  se.addField("scheduled_task.id");
+  se.addField("scheduled_task.script_id");
+  se.addField("scheduled_task.script_id.description");
+  se.addField("scheduled_task.schedule_id");
+  se.addField("scheduled_task.description");
+  se.executeToJSONBuilder(jb, "id:Integer,script_id:Integer,script_id.description:String,schedule_id:Integer,description:String", "scheduled_task");
+}
+
+Void getSchedule()
+{
+  SearchEngine se;
+  se.addField("schedule.id");
+  se.addField("schedule.domain");
+  se.addField("schedule.status");
+  se.addField("schedule.frequency");
+  se.addField("schedule.asap");
+  se.addField("schedule.disabled");
+  se.addField("schedule.stop");
+  se.addField("schedule.name");
+  se.addField("schedule.after_schedule_id");
+  se.addField("schedule.minute_interval");
+  se.addField("schedule.weekdays");
+  se.addField("schedule.months");
+  se.addField("schedule.min_of_hour");
+  se.addField("schedule.day_of_month");
+  se.addField("schedule.time_of_day");
+  se.addField("schedule.once_at");
+  se.addField("schedule.next_execution");
+  se.addField("schedule.last_execution");
+  se.addField("schedule.execution_time");
+  se.addField("schedule.lock_expire");
+  se.addField("schedule.lock_pid");
+  se.addField("schedule.lock_ttl");
+  se.addField("schedule.error_message");
+  se.addField("schedule.last_error");
+  se.addField("schedule.retries");
+  se.addField("schedule.retry_interval");
+
+  String fields;
+  fields.append("id:Integer,domain:Integer,status:Integer,frequency:Integer,asap:Boolean,disabled:Boolean,stop:Boolean,name:String,after_schedule_id:Integer,minute_interval:Integer,weekdays:Integer,");
+  fields.append("months:Integer,min_of_hour:Integer,day_of_month:Integer,time_of_day:String,once_at:String,next_execution:String,last_execution:String,execution_time:Integer,lock_expire:String,lock_pid:Integer,");
+  fields.append("lock_ttl:Integer,error_message:String,last_error:String,retries:Integer,retry_interval:Integer");
+  se.executeToJSONBuilder(jb, fields, "schedule");
+}
+
+Void getExtraTables()
 {
   SearchEngine se;
   se.addField("extra_tables.id");
@@ -194,13 +250,13 @@ Void getExtraTablesJson()
 
   // NOTE: Bug caues description to appear twice. Use key with name "extra_tables.description", not "description"
   String fields;
-  fields.append("id:Integer,table_name:String,search_header:String,view_entry_header:String,new_entry_header:String,edit_entry_header:String,hierarchy_id:Integer,");
-  fields.append("sort_order:String,display_field:String,flags:Integer,parent_field:String,fullname_field:Integer,screen_chooser_entry:Integer,screen_chooser_all:Integer,screen_chooser_edit:Integer,description:String");
+  fields.append("id:Integer,table_name:String,search_header:String,view_entry_header:String,new_entry_header:String,edit_entry_header:String,hierarchy_id:Integer,sort_order:String,");
+  fields.append("display_field:String,flags:Integer,parent_field:String,fullname_field:Integer,screen_chooser_entry:Integer,screen_chooser_all:Integer,screen_chooser_edit:Integer,description:String");
 
   se.executeToJSONBuilder(jb, fields, "extra_tables");
 }
 
-Void getExtraFieldsJson()
+Void getExtraFields()
 {
   SearchEngine se;
   se.addField("extra_fields.id");
@@ -226,6 +282,7 @@ String getDataToJson()
   Bool fetchTriggers = getCgiVariable("fetch_triggers").toBool();
   Bool fetchScreens = getCgiVariable("fetch_screens").toBool();
   Bool fetchScreenChoosers = getCgiVariable("fetch_screen_choosers").toBool();
+  Bool fetchScheduledTasks = getCgiVariable("fetch_scheduled_tasks").toBool();
   Bool fetchExtraTables = getCgiVariable("fetch_extra_tables").toBool();
 
   // Get data from database and create JSON
@@ -236,42 +293,51 @@ String getDataToJson()
   if (fetchScripts)
   {
     jb.pushObject("group_scripts");
-    getScriptFoldersJson();
-    getScriptsJson();
+    getScriptFolders();
+    getScripts();
     jb.popLevel();
   }
 
   if (fetchTriggers)
   {
     jb.pushObject("group_triggers");
-    getTriggersJson();
+    getTriggers();
     jb.popLevel();
   }
 
   if (fetchScreens)
   {
     jb.pushObject("group_screens");
-    getScreenFoldersJson();
-    getScreenDefinitionJson();
-    getScreenDefinitionActionJson();
-    getScreenDefinitionElementJson();
-    getScreenDefinitionHiddenJson();
-    getScreenDefinitionLanguageJson();
+    getScreenFolders();
+    getScreenDefinition();
+    getScreenDefinitionAction();
+    getScreenDefinitionElement();
+    getItemConfig();
+    getScreenDefinitionHidden();
+    getScreenDefinitionLanguage();
     jb.popLevel();
   }
 
   if (fetchScreenChoosers)
   {
     jb.pushObject("group_screen_choosers");
-    getScreenChoosersJson();
+    getScreenChoosers();
+    jb.popLevel();
+  }
+
+  if (fetchScheduledTasks)
+  {
+    jb.pushObject("group_scheduled_tasks");
+    getScheduledTasks();
+    getSchedule();
     jb.popLevel();
   }
 
   if (fetchExtraTables)
   {
     jb.pushObject("group_extra_tables");
-    getExtraTablesJson();
-    getExtraFieldsJson();
+    getExtraTables();
+    getExtraFields();
     jb.popLevel();
   }
 

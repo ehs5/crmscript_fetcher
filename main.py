@@ -1,4 +1,4 @@
-from files_and_folders import create_folder
+from files_and_folders import create_folder, create_scheduled_tasks_files
 from files_and_folders import delete_folder
 from files_and_folders import move_folder
 from files_and_folders import create_scripts_hierarchy
@@ -94,6 +94,7 @@ class Fetch:
             "fetch_triggers": True,
             "fetch_screens": True,
             "fetch_screen_choosers": True,
+            "fetch_scheduled_tasks": True,
             "fetch_extra_tables": False
         }
 
@@ -184,6 +185,7 @@ class Fetch:
         triggers_directory: str = f"{self.tenant.get('local_directory')}/Triggers"
         screens_directory: str = f"{self.tenant.get('local_directory')}/Screens"
         screen_choosers_directory: str = f"{self.tenant.get('local_directory')}/ScreenChoosers"
+        scheduled_tasks_directory: str = f"{self.tenant.get('local_directory')}/Scheduled Tasks"
 
         print("Trying to delete temp folder in case it was not deleted on previous fetch")
         delete_folder(temp_directory)
@@ -194,17 +196,20 @@ class Fetch:
         move_folder(triggers_directory, temp_directory)
         move_folder(screens_directory, temp_directory)
         move_folder(screen_choosers_directory, temp_directory)
+        move_folder(scheduled_tasks_directory, temp_directory)
 
         print("Creating folders and files from JSON")
         create_folder(scripts_directory)
         create_folder(triggers_directory)
         create_folder(screens_directory)
         create_folder(screen_choosers_directory)
+        create_folder(scheduled_tasks_directory)
 
         create_scripts_hierarchy(scripts_directory, self.data["group_scripts"])
         create_trigger_files(triggers_directory, self.data["group_triggers"]["triggers"])
         create_screens_hierarchy(screens_directory, self.data["group_screens"])
         create_screen_chooser_files(screen_choosers_directory, self.data["group_screen_choosers"]["screen_choosers"])
+        create_scheduled_tasks_files(scheduled_tasks_directory, self.data["group_scheduled_tasks"])
 
         print("Deleting temp folder")
         delete_folder(temp_directory)
