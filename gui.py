@@ -17,8 +17,6 @@ def button_folder_browse():
     directory = filedialog.askdirectory()
     if directory:
         label_local_directory_path.config(text=directory)
-    else:
-        pass
 
 
 def tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
@@ -45,26 +43,28 @@ def click_button_save():
     tenant_name = e_tenant_name.get()
     local_directory = label_local_directory_path.cget("text")
 
-    if tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
-        updated_tenant = {
-            "id": tenant_id,
-            "include_id": e_include_id.get(),
-            "key": e_key.get(),
-            "local_directory": local_directory,
-            "tenant_name": tenant_name,
-            "url": e_superoffice_url.get()
-        }
+    if not tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
+        return
 
-        ts = TenantSettingsJson()
-        ts.update_tenant_in_json(updated_tenant)
+    updated_tenant = {
+        "id": tenant_id,
+        "include_id": e_include_id.get(),
+        "key": e_key.get(),
+        "local_directory": local_directory,
+        "tenant_name": tenant_name,
+        "url": e_superoffice_url.get()
+    }
 
-        # Reload tree in order to reflect any changes in tenant name. Then re-set focus to same tenant.
-        tree_load_tenants()
-        for child in tree.get_children():
-            if tree.item(child)["values"][1] == tenant_id:
-                tree.selection_set(child)
-                break
-        tenant_settings_buttons_normal_state()
+    ts = TenantSettingsJson()
+    ts.update_tenant_in_json(updated_tenant)
+
+    # Reload tree in order to reflect any changes in tenant name. Then re-set focus to same tenant.
+    tree_load_tenants()
+    for child in tree.get_children():
+        if tree.item(child)["values"][1] == tenant_id:
+            tree.selection_set(child)
+            break
+    tenant_settings_buttons_normal_state()
 
 
 def click_button_reset():
@@ -111,20 +111,22 @@ def click_button_delete_tenant():
                             "Consider changing the values of the selected tenant instead.")
 
 
-def click_button_fetch():
+def click_button_fetch() -> None:
     tenant = get_selected_tenant_in_tree()
-    if tenant_is_valid_for_fetch(tenant):
-        if messagebox.askquestion("Fetch CRMScripts",
-                                  "You are about to fetch CRMScripts from SuperOffice.\n\n"
-                                  "Note: Any files or folders inside the Scripts and Triggers folders "
-                                  "that are not present in Superoffice will be deleted.\n\n"
-                                  "Do you want to continue?") == "yes":
+    if not tenant_is_valid_for_fetch(tenant):
+        return
 
-            fetch = Fetch(tenant)
-            if fetch.fetch():
-                messagebox.showinfo("Success", "CRMScripts fetched successfully!")
-            else:
-                messagebox.showerror("Error", "Could not fetch from CRMScripts from tenant.")
+    question: str = "You are about to fetch CRMScripts from SuperOffice.\n\n"\
+                    "Note: Any files or folders inside the Scripts and Triggers folders "\
+                    "that are not present in Superoffice will be deleted.\n\n"\
+                    "Do you want to continue?"
+
+    if messagebox.askquestion("Fetch CRMScripts", question) == "yes":
+        fetch = Fetch(tenant)
+        if fetch.fetch():
+            messagebox.showinfo("Success", "CRMScripts fetched successfully!")
+        else:
+            messagebox.showerror("Error", "Could not fetch from CRMScripts from tenant.")
 
 
 def click_button_open_file_explorer():
