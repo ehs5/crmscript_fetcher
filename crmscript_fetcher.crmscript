@@ -248,7 +248,7 @@ Void getExtraTables()
   se.addField("extra_tables.screen_chooser_edit");
   se.addField("extra_tables.description");
 
-  // NOTE: Bug caues description to appear twice. Use key with name "extra_tables.description", not "description"
+  // NOTE: Bug causes description to appear twice. Use key with name "extra_tables.description", not "description"
   String fields;
   fields.append("id:Integer,table_name:String,search_header:String,view_entry_header:String,new_entry_header:String,edit_entry_header:String,hierarchy_id:Integer,sort_order:String,");
   fields.append("display_field:String,flags:Integer,parent_field:String,fullname_field:Integer,screen_chooser_entry:Integer,screen_chooser_all:Integer,screen_chooser_edit:Integer,description:String");
