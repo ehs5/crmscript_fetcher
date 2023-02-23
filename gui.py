@@ -570,33 +570,6 @@ class FetchOptionsPopup(tk.Toplevel):
         self.destroy()
 
 
-def key(event):
-    char_pressed: str = event.char
-    # With current selected tenant as starting point
-    ts = TenantSettingsJson()
-
-    tree_children: list = list(tree.get_children())
-    selected_tree_child: str = tree.selection()[0]
-    #print(selected_tree_child)
-
-    # values = tree.item(tree.selection()).get("values")
-    # print(values)
-    # if len(values) > 0:
-    #     tenant_id = values[1]
-
-
-    # selected_tenant: dict = get_selected_tenant_in_tree()
-    #
-    # tree_children = tree.get_children()
-    # print(tree_children)
-    # #
-    # # for child in tree.get_children():
-    # #     if tree.item(child)["values"][1] == tenant_id:
-    # #         tree.selection_set(child)
-    # #         break
-    # #
-    # # # Get next tenant starting with char_pressed
-
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -608,14 +581,10 @@ class App(tk.Tk):
 
         self.create_widgets()
         self.load_tenants()
-        self.key_binds()
 
     def create_widgets(self):
         main_frame = MainFrame(self)
         main_frame.grid(column=0, row=0, padx=10)
-
-    def key_binds(self):
-        self.bind("<Key>", key)
 
     @staticmethod
     def load_tenants():
