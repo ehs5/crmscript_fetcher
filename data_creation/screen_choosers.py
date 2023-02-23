@@ -12,7 +12,7 @@ def create_screen_chooser_files(screen_choosers_directory: str, screen_choosers:
     for sc in screen_choosers:
         file_name_no_ext: str = sc.get("description")
         if not file_name_no_ext:
-            file_name_no_ext = f"Unnamed ScreenChooser (ID {sc.get('unique_identifier')})"
+            file_name_no_ext = f"Unnamed ScreenChooser (ID {sc.get('id')})"
         file_name_no_ext = safe_name(file_name_no_ext)
 
         # Create script body file

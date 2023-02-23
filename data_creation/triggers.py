@@ -8,7 +8,7 @@ def create_trigger_files(triggers_directory: str, triggers: list[dict]) -> None:
     for t in triggers:
         file_name_no_ext: str = t.get("description")
         if not file_name_no_ext:
-            file_name_no_ext = f"Unnamed trigger (ID {t.get('unique_identifier')})"
+            file_name_no_ext = f"Unnamed trigger (ID {t.get('id')})"
         file_name_no_ext = safe_name(file_name_no_ext)
 
         # Create script body file
