@@ -5,6 +5,14 @@
         "key": "yourUniqueKeyHere",
         "local_directory": "C:/My directory",
         "tenant_name": "Example tenant",
-        "url": "https://online.superoffice.com/CustXXXXX/CS"
+        "url": "https://online.superoffice.com/CustXXXXX/CS",
+        "fetch_options": {
+            "fetch_scripts": true,
+            "fetch_triggers": true,
+            "fetch_screens": true,
+            "fetch_screen_choosers": true,
+            "fetch_scheduled_tasks": true,
+            "fetch_extra_tables": true
+        }
     }
 ]
