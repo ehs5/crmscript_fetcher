@@ -29,8 +29,8 @@ CRMScript Fetcher aims to recreate the same folder structure as you see in Super
 The software is provided "as is" without warranty of any kind. 
 All responsibility of the usage of CRMSCript Fetcher lies on you.
 
-> :warning: **When fetching, all files and folders within the 
-> "Scripts", "Triggers", "Screens", "ScreenChoosers","Scheduled tasks", and "Tables" folders
+> :warning: **When fetching, all files and folders within the folders
+> Scripts, Triggers, Screens, ScreenChoosers, Scheduled tasks and Tables
 > WILL be deleted if they are not present in SuperOffice.**
 > 
 > 
