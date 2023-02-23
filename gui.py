@@ -49,15 +49,9 @@ def tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
 
     if tenant_is_valid:
         return True
-    messagebox.showerror("Error", message)
-
-    # Reload tree in order to reflect any changes in tenant name. Then re-set focus to same tenant.
-    tree_load_tenants()
-    for child in tree.get_children():
-        if tree.item(child)["values"][1] == tenant_id:
-            tree.selection_set(child)
-            break
-    tenant_settings_buttons_normal_state()
+    else:
+        messagebox.showerror("Error", message)
+        return False
 
 
 def tenant_is_valid_for_fetch(tenant):
@@ -263,8 +257,13 @@ class TenantButtonsFrame(ttk.Frame):
         local_directory = label_local_directory_path.cget("text")
 
         if not tenant_is_valid_for_save(tenant_id, tenant_name, local_directory):
+            # Revert original tenant settings in tree
+            selected_tenant = get_selected_tenant_in_tree()
+            load_tenant_settings_to_gui(selected_tenant)
+            tenant_settings_buttons_normal_state()
             return
 
+        # Proceed to update tenant in tenant_settings.json
         updated_tenant = {
             "id": tenant_id,
             "include_id": e_include_id.get(),
@@ -275,6 +274,17 @@ class TenantButtonsFrame(ttk.Frame):
         }
         ts = TenantSettingsJson()
         ts.update_tenant(updated_tenant)
+
+        tenant_settings_buttons_normal_state()
+        tree_load_tenants()
+
+        # Reload tree in order to reflect any changes in tenant name. Then re-set focus to same tenant.
+        tree_load_tenants()
+        for child in tree.get_children():
+            if tree.item(child)["values"][1] == tenant_id:
+                tree.selection_set(child)
+                break
+        tenant_settings_buttons_normal_state()
 
     @staticmethod
     def click_button_reset():
@@ -560,6 +570,33 @@ class FetchOptionsPopup(tk.Toplevel):
         self.destroy()
 
 
+def key(event):
+    char_pressed: str = event.char
+    # With current selected tenant as starting point
+    ts = TenantSettingsJson()
+
+    tree_children: list = list(tree.get_children())
+    selected_tree_child: str = tree.selection()[0]
+    #print(selected_tree_child)
+
+    # values = tree.item(tree.selection()).get("values")
+    # print(values)
+    # if len(values) > 0:
+    #     tenant_id = values[1]
+
+
+    # selected_tenant: dict = get_selected_tenant_in_tree()
+    #
+    # tree_children = tree.get_children()
+    # print(tree_children)
+    # #
+    # # for child in tree.get_children():
+    # #     if tree.item(child)["values"][1] == tenant_id:
+    # #         tree.selection_set(child)
+    # #         break
+    # #
+    # # # Get next tenant starting with char_pressed
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -571,10 +608,14 @@ class App(tk.Tk):
 
         self.create_widgets()
         self.load_tenants()
+        self.key_binds()
 
     def create_widgets(self):
         main_frame = MainFrame(self)
         main_frame.grid(column=0, row=0, padx=10)
+
+    def key_binds(self):
+        self.bind("<Key>", key)
 
     @staticmethod
     def load_tenants():
