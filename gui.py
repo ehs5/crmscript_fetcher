@@ -430,7 +430,7 @@ class ContentBottomButtons(ttk.Frame):
                                     "Updating the script is recommended.")
 
             if fetch_success:
-                messagebox.showinfo("Success", "CRMScripts fetched successfully!")
+                messagebox.showinfo("Success", "Fetch successful!")
             else:
                 messagebox.showerror("Error", "Could not fetch from CRMScripts from tenant.")
 
