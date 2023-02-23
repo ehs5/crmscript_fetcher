@@ -1,29 +1,37 @@
 # CRMScript Fetcher
 
-CRMScript Fetcher is a GUI tool that can download CRMScripts from your 
-SuperOffice installations, and create the scripts as files within a 
+CRMScript Fetcher is a GUI tool that can download CRMScripts and other data from your 
+SuperOffice installations, and create the data as files within a 
 folder structure on your local PC.
  ![alt text](https://repository-images.githubusercontent.com/463300828/47a6dff7-5790-4a8a-982e-48a918f0a431)
 
 ## About
 
-CRMScript Fetcher is useful for downloading your current scripts into a local repository,
-which you then may use for pushing into Github/Gitlab etc. with your preferred git client.
+CRMScript Fetcher is useful for downloading your current scripts and other data such as screens
+and scheduled tasks into a local repository, which you then may use for pushing into Github/Gitlab etc. 
+with your preferred git client.
 
-When fetching, it will create the following two folders inside your chosen directory:
+When fetching, it will create the following folders inside your chosen directory:
 - Scripts
 - Triggers
+- Screens
+- ScreenChoosers
+- Scheduled tasks
+- Tables
 
-Inside these folders, all scripts/triggers will be created as files with a .crmscript file extension.
-For Scripts, it will also recreate the exact same folder structure as the one you have in SuperOffice.
+Inside these folders, scripts will be created as files with a .crmscript file extension.
+Metadata will be created as .json files. 
+
+CRMScript Fetcher aims to recreate the same folder structure as you see in SuperOffice, as much as possible.
 
 ## Important to know
 
 The software is provided "as is" without warranty of any kind. 
 All responsibility of the usage of CRMSCript Fetcher lies on you.
 
-> :warning: **When fetching, all files and folders within the "Scripts" and "Triggers" folders WILL be 
-> deleted if they are not present in SuperOffice.**
+> :warning: **When fetching, all files and folders within the 
+> "Scripts", "Triggers", "Screens", "ScreenChoosers","Scheduled tasks", and "Tables" folders
+> WILL be deleted if they are not present in SuperOffice.**
 > 
 > 
 > This also includes files/folders that weren't created by CRMScript Fetcher to begin with, so it is not
@@ -31,15 +39,13 @@ All responsibility of the usage of CRMSCript Fetcher lies on you.
 > 
 > However, files/folders within the root directory will not be deleted, so you can put stuff there safely.
 
-Technically, all files and folders within the Scripts and Triggers folders will be deleted and recreated
-every time you click fetch, even if you have done no changes in SuperOffice. 
-
+Technically, all files and folders within the created folders will be deleted and recreated
+every time you click fetch, even if you have done no changes in SuperOffice.  
 It is up to you to consider if this poses any problems for your usage. 
-Based on my own usage though, Git will not detect these deletes and rewrites as changes.
 
 #### About the temp backup folder
-Each fetch will create a "temp" folder where your current local Scripts/Triggers
-folders are moved into, as a failsafe in case the fetch fails during its execution.
+Each fetch will create a "temp" folder where your current fetcher-created folders are moved into,
+as a failsafe in case the fetch fails during its execution.
 The temp folder will be deleted again upon completing the fetch, so you shouldn't normally see it.
 
 If something does go wrong, you can move the contents of temp back into the root folder.
@@ -73,7 +79,7 @@ Alternatively, open "CRMScript Fetcher.crmscript" in a text editor, and copy the
 
 
 3. In your SuperOffice installation, create a new script and paste the contents.
-Give it an include name (e.g. "crmscript_fetcher") and a secret key (or just use the one generated).
+Give it an "include name" (e.g. "crmscript_fetcher") and a secret key.
 
 
 4. Click "Add tenant"

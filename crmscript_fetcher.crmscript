@@ -227,6 +227,21 @@ Void getSchedule()
   se.executeToJSONBuilder(jb, fields, "schedule");
 }
 
+// Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
+Void getExtraTableFolders()
+{
+  SearchEngine se;
+  se.addField("hierarchy.id");
+  se.addField("hierarchy.name");
+  se.addField("hierarchy.fullname");
+  se.addField("hierarchy.domain");
+  se.addField("hierarchy.parent_id");
+  se.addCriteria("hierarchy.domain", "Equals", "1");
+  se.addOrder("hierarchy.parent_id", True);
+  se.addOrder("hierarchy.id", True);
+  se.executeToJSONBuilder(jb, "id:Integer,name:String,fullname:String,domain:Integer,parent_id:Integer", "extra_table_folders");
+}
+
 Void getExtraTables()
 {
   SearchEngine se;
@@ -248,7 +263,6 @@ Void getExtraTables()
   se.addField("extra_tables.screen_chooser_edit");
   se.addField("extra_tables.description");
 
-  // NOTE: Bug causes description to appear twice. Use key with name "extra_tables.description", not "description"
   String fields;
   fields.append("id:Integer,table_name:String,search_header:String,view_entry_header:String,new_entry_header:String,edit_entry_header:String,hierarchy_id:Integer,sort_order:String,");
   fields.append("display_field:String,flags:Integer,parent_field:String,fullname_field:Integer,screen_chooser_entry:Integer,screen_chooser_all:Integer,screen_chooser_edit:Integer,description:String");
@@ -336,6 +350,7 @@ String getDataToJson()
   if (fetchExtraTables)
   {
     jb.pushObject("group_extra_tables");
+    getExtraTableFolders();
     getExtraTables();
     getExtraFields();
     jb.popLevel();
