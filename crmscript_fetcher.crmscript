@@ -5,7 +5,6 @@
 JSONBuilder jb;
 Integer scriptVersion = 2;
 
-// Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
 Void getScriptFolders()
 {
   SearchEngine se;
@@ -56,7 +55,6 @@ Void getTriggers()
   se.executeToJSONBuilder(jb, "id:Integer,screen_type:Integer,description:String,enabled:Integer,unique_identifier:String,registered:String,registered_associate_id:Integer,updated:String,updated_associate_id:Integer,body:String", "triggers");
 }
 
-// Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
 Void getScreenFolders()
 {
   SearchEngine se;
@@ -227,7 +225,6 @@ Void getSchedule()
   se.executeToJSONBuilder(jb, fields, "schedule");
 }
 
-// Domain 1: Tables, Domain 2: Screens, Domain 3: Scripts
 Void getExtraTableFolders()
 {
   SearchEngine se;
