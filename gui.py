@@ -432,7 +432,7 @@ class ContentBottomButtons(ttk.Frame):
             if fetch_success:
                 messagebox.showinfo("Success", "Fetch successful!")
             else:
-                messagebox.showerror("Error", "Could not fetch from CRMScripts from tenant.")
+                messagebox.showerror("Error", "Could not fetch data from tenant.")
 
     @staticmethod
     def click_button_open_file_explorer():
