@@ -62,6 +62,6 @@ def create_default_table_files(directory: str, extra_fields: list[dict]) -> None
         create_json_file(directory, f"{domains[domain]}.json", table)
 
 
-def create_table_hierarchy(directory: str, group_extra_tables: dict, lookup_parent_id: int = -1) -> None:
+def create_table_hierarchy(directory: str, group_extra_tables: dict) -> None:
     create_extra_tables_hierarchy(directory, group_extra_tables)
     create_default_table_files(directory, group_extra_tables["extra_fields"])
