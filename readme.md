@@ -8,7 +8,7 @@ folder structure on your local PC.
 ## About
 
 CRMScript Fetcher is useful for downloading your current scripts and other data such as screens
-and scheduled tasks into a local repository, which you then may use for pushing into Github/Gitlab etc. 
+and scheduled tasks into a local repository, which you then may use for pushing into GitHub/Gitlab etc. 
 with your preferred git client.
 
 When fetching, it will create the following folders inside your chosen directory:
@@ -27,7 +27,7 @@ CRMScript Fetcher aims to recreate the same folder structure as you see in Super
 ## Important to know
 
 The software is provided "as is" without warranty of any kind. 
-All responsibility of the usage of CRMSCript Fetcher lies on you.
+All responsibility of the usage of CRMScript Fetcher lies on you.
 
 > :warning: **When fetching, all files and folders within the folders
 > Scripts, Triggers, Screens, ScreenChoosers, Scheduled tasks and Tables
@@ -64,7 +64,7 @@ errors. Usually this works itself out by running the fetch again.
 
 ## Getting Started
 
-1. Head over to Releases on the right hand side to download. 
+1. Head over to Releases on the right-hand side to download. 
 
 
 2. Unpack the zip file wherever you want
