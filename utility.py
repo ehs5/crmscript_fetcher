@@ -18,7 +18,8 @@ def safe_name(text: str) -> str:
         ("*", "X"),
         ("<", " Lt "),
         (">", " Gt "),
-        ("|", "I")
+        ("|", "I"),
+        ("?", "")
     ]
     for chars in replace_chars:
         text = text.replace(chars[0], chars[1])
