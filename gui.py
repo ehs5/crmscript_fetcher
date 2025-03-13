@@ -432,17 +432,25 @@ class ContentBottomButtons(ttk.Frame):
 
         if messagebox.askquestion("Fetch CRMScripts", question) == "yes":
             fetch = Fetch(tenant)
-            fetch_success: bool = fetch.fetch()
+            
+            try:
+                fetch_success: bool = fetch.fetch()
+                
+                if fetch.crmscript_version and fetch.crmscript_version < CURRENT_CRMSCRIPT_VERSION:
+                    messagebox.showinfo("CRMScript version",
+                                        "The fetcher CRMScript in use is not of the latest version.\n"
+                                        "Updating the script is recommended.")
 
-            if fetch.crmscript_version and fetch.crmscript_version < CURRENT_CRMSCRIPT_VERSION:
-                messagebox.showinfo("CRMScript version",
-                                    "The fetcher CRMScript in use is not of the latest version.\n"
-                                    "Updating the script is recommended.")
+                if fetch_success:
+                    messagebox.showinfo("Success", "Fetch successful!")
+                else:
+                    error_message = getattr(fetch, "last_error", "Unknown error occurred.")
+                    messagebox.showerror("Error", f"Could not fetch data from tenant.\n\nError: {error_message}")
 
-            if fetch_success:
-                messagebox.showinfo("Success", "Fetch successful!")
-            else:
-                messagebox.showerror("Error", "Could not fetch data from tenant.")
+            except Exception as e:
+                messagebox.showerror("Error", f"An unexpected error occurred while fetching:\n{str(e)}")
+
+
 
     @staticmethod
     def click_button_open_file_explorer():
