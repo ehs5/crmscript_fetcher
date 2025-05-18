@@ -1,0 +1,28 @@
+<html>
+    <script type="text/javascript" src="/eel.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Wait a tick for eel to finish injecting
+        await new Promise(resolve => setTimeout(resolve, 100));  // Optional safety delay
+        const tenants = await eel.get_tenant_settings()();
+
+        const ul = document.getElementById("tenants");
+        for (const t of tenants) {
+            console.log(t);
+
+            const li = document.createElement("li");
+            li.textContent = t.tenant_name + " (" + t.url + ")";
+            ul.appendChild(li);
+        }
+
+    });
+</script>
+    <body>
+        <h1>CRMScript Fetcher with Eel</h1>
+        <h2>Loaded Tenants</h2>
+        <ul id="tenants">
+
+        </ul>
+    </body>
+</html>
