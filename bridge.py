@@ -1,3 +1,4 @@
+# Bridge between frontend (Vue.js) and backend (Python)
 import eel
 from tenant_settings import TenantSettingsJson
 

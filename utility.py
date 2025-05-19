@@ -1,12 +1,25 @@
 # Functions for handling local files and folders
 import os
+import sys
 import json
 import shutil
 from typing import Any
+from pathlib import Path
 from tenacity import retry
 from tenacity import wait_fixed
 from tenacity import stop_after_attempt
 
+
+def get_app_directory() -> Path:
+    """
+    Returns the correct path that crmscript fetcher resides in
+    regardless of whether its run as a .exe or in a code editor, and regardless of OS
+    """
+    # When ran as .exe bundled by PyInstaller
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).parent
+    # When running from source
+    return Path(__file__).resolve().parent
 
 def safe_name(text: str) -> str:
     """Replace characters that are not allowed in Windows folders/files"""

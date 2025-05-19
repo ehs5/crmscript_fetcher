@@ -1,13 +1,12 @@
 import json
-from pathlib import Path
+from utility import get_app_directory
 
 class TenantSettingsJson:
     """
     Represents the tenant settings JSON file. By "tenant" we mean a SuperOffice installation.
     """
     def __init__(self, add_fetch_options: bool = False):
-        base_path = Path(__file__).resolve().parent
-        self.tenant_settings_filename: Path = base_path / "tenant_settings.json"
+        self.tenant_settings_filename = get_app_directory() / "tenant_settings.json"
 
         self.tenant_settings: list[dict] = []
         with open(self.tenant_settings_filename) as f:
