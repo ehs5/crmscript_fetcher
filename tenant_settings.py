@@ -1,6 +1,7 @@
 import json
 from utility import get_app_directory
 
+# To be deleted
 class TenantSettingsJson:
     """
     Represents the tenant settings JSON file. By "tenant" we mean a SuperOffice installation.
