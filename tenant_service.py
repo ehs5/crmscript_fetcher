@@ -24,6 +24,7 @@ class TenantService:
 
     @staticmethod
     def get_next_id(all_tenants: list[dict]) -> int:
+        if not all_tenants: return 1
         return max(t["id"] for t in all_tenants) + 1
 
     def add_tenant(self, new_tenant: dict) -> dict:
@@ -31,14 +32,17 @@ class TenantService:
         Adds a new tenant to json file
         Returns the tenant with new ID
         """
-        # Some basic validation to make sure frontend isn't sending empty objects
+        # To make sure frontend isn't sending empty objects
         if not new_tenant.get("tenant_name"):
             raise Exception("Tenant name is missing")
+
+        if not new_tenant.get("url"):
+            raise Exception("URL is missing")
 
         with open(self.tenant_settings_filename, 'r+') as f:
             tenants: list[dict] = json.load(f)
 
-            # Set the new tenants ID before adding to list
+            # Set the new tenant's ID before adding to list
             new_tenant["id"] = self.get_next_id(tenants)
             tenants.append(new_tenant)
 

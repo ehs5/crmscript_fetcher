@@ -17,7 +17,7 @@ def main():
     vue_folder = str(Path(__file__).parent / "vue/dist")
     start_file_name = "index.html"
     modes: list[str] = get_modes()
-    size = (1000, 800)
+    size = (960, 685)
     port = 8686 # If set to 0: Eel picks port automatically
 
     eel.init(vue_folder)
@@ -27,7 +27,7 @@ def main():
     for m in modes:
         try:
             print(f"Launching in {m} mode on port {port}")
-            eel.start(start_file_name, mode=m, size=size, port=port)
+            eel.start(start_file_name, mode=m, size=size, port=port) # TODO: Set position? (100, 100) ?
             break
         except EnvironmentError:
             print(f"Could not launch in {m} mode, trying next")
