@@ -100,6 +100,40 @@ https://online.superoffice.com/CustXXXXX/CS
 All your tenant settings will be saved locally in the tenant_settings.json file.
 
 
+## Quick Dev Guide
+
+### Development
+1. In `vue/index.html`, comment/uncomment the right sections:
+```html
+<!-- Production mode -->
+<!--<script type="text/javascript" src="http://localhost:8686/eel.js"></script>-->
+<!-- Production mode end -->
+
+<!-- Development mode start -->
+<script type="text/javascript" src="http://localhost:8686/eel.js"></script>
+<script type="text/javascript"> eel._host = "http://localhost:8686"</script>
+<!-- Development mode end -->
+```
+
+2. Run `main.py` in your Python IDE.
+This makes the Python backend run on `http://localhost:8686`.
+This will show you the frontend that already has been built, not the frontend that is currently in development.
+Keep this window open.
+
+
+3. Start Vue:
+```bash
+npm run dev
+```
+App should now run on `http://localhost:5173` (or another port) with hot reload.
+
+### How to Build
+1. Switch the comments in `index.html` back to production mode
+2. `npm run build`
+3. Package with PyInstaller
+
+[TODO: Add PyInstaller commands]
+
 ## Built With
 
 - Python

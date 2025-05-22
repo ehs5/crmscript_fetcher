@@ -18,7 +18,7 @@ def main():
     start_file_name = "index.html"
     modes: list[str] = get_modes()
     size = (1000, 800)
-    port = 8686 # 0 = Eel picks port automatically
+    port = 8686 # If set to 0: Eel picks port automatically
 
     eel.init(vue_folder)
 
@@ -26,11 +26,11 @@ def main():
     # "default" launches in a normal browser tab in user's default browser
     for m in modes:
         try:
-            print(f"Launching in mode: '{m}'")
+            print(f"Launching in {m} mode on port {port}")
             eel.start(start_file_name, mode=m, size=size, port=port)
             break
         except EnvironmentError:
-            print(f"Could not launch in mode '{m}', trying next")
+            print(f"Could not launch in {m} mode, trying next")
             continue
 
 

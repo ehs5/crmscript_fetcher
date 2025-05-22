@@ -1,6 +1,17 @@
 @import 'element-plus/dist/index.css';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
 #app {
+  font-family: 'Inter', sans-serif;
+  height: 100%;
+}
+
+.el-message {
   font-family: 'Inter', sans-serif;
 }
