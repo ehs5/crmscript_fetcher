@@ -4,23 +4,51 @@ from utility import get_app_directory
 
 class TenantService:
     """
-    Service class for reading and saving the TenantSettings.json file.
+    Service class for reading and saving the tenant_settings.json file.
     """
     def __init__(self):
         self.tenant_settings_filename = get_app_directory() / "tenant_settings.json"
 
-    def get_all_tenants(self) -> list[dict]:
+    def get_all_tenants(self, initial_load: bool = False) -> list[dict]:
         """"
         Loads and returns the tenant settings file from file.
-        TODO: Can I return it like does or must it be a json?
+        Set initial_load to True when you load tenants the firs time at launch,
+        this ensures data integrity of the JSON.
         """
-        with open(self.tenant_settings_filename) as f:
-            return json.load(f)
+        all_tenants: list[dict] = []
 
-    def save(self, tenant_settings: list[dict]):
-        """Saves entire JSON file"""
+        with open(self.tenant_settings_filename) as f:
+            all_tenants = json.load(f)
+
+        if initial_load:
+            self.add_missing_fetch_options(all_tenants)
+
+        return all_tenants
+
+    def add_missing_fetch_options(self, all_tenants: list[dict]) -> list[dict]:
+        """
+        Checks if there are any tenants without "fetch options", and if so adds a default dictionary to each.
+        Is done because earlier CRMScript Fetcher version did not contain this object in JSON.
+        """
+        fetch_options = {
+            "fetch_scripts": True,
+            "fetch_triggers": True,
+            "fetch_screens": True,
+            "fetch_screen_choosers": True,
+            "fetch_scheduled_tasks": True,
+            "fetch_extra_tables": True
+        }
+
+        for tenant in [t for t in all_tenants if t.get("fetch_options") is None]:
+            tenant["fetch_options"] = fetch_options
+
+        self.save(all_tenants)
+        return all_tenants
+
+    def save(self, all_tenants: list[dict]):
+        """Saves entire JSON file. Must include all tenants!"""
         with open(self.tenant_settings_filename, "w") as f:
-            f.write(json.dumps(tenant_settings, indent=4))
+            f.write(json.dumps(all_tenants, indent=4))
 
     @staticmethod
     def get_next_id(all_tenants: list[dict]) -> int:
@@ -29,7 +57,7 @@ class TenantService:
 
     def add_tenant(self, new_tenant: dict) -> dict:
         """
-        Adds a new tenant to json file
+        Adds a new tenant to json file and saves file.
         Returns the tenant with new ID
         """
         # To make sure frontend isn't sending empty objects
@@ -63,7 +91,7 @@ class TenantService:
 
     def update_tenant(self, tenant: dict):
         """
-        Updates an existing tenant in json file by its ID.
+        Updates an existing tenant in json file by its ID, and saves file.
         """
         # Some basic validation to make sure Vue isn't sending faulty objects
         if not tenant.get("id"):
@@ -96,45 +124,9 @@ class TenantService:
         all_tenants.pop(tenant_index)
         self.save(all_tenants)
 
-    # def get_tenant(self, tenant_id: int) -> dict:
-    #    """
-    #    Returns the tenant from JSON file by its ID
-    #    TODO: Are we using this?
-    #    """
-    #    all_tenants: list[dict] = self.get_all_tenants()
-    #    return [t for t in all_tenants if t.get("id") == tenant_id][0]
-
     # # TODO move to frontend
     # def local_directory_taken(self, tenant_id: int, local_directory: str) -> bool | None:
     #    """Returns True if another tenant in the tenant settings file uses the given local directory path"""
     #    for t in self.tenant_settings:
     #        if (t.get("id") != tenant_id) and (t.get("local_directory") == local_directory):
     #            return True
-
-
-    # TODO: Remember to always include this in frontend instead of doing it here
-    #
-    # def add_missing_fetch_options(self) -> None:
-    #     """
-    #     Checks if there are any tenants without "fetch options", and if so adds a default dictionary to each.
-    #     Is done because earlier CRMScript Fetcher version did not contain this object in JSON.
-    #     """
-    #     for tenant in [t for t in self.tenant_settings if t.get("fetch_options") is None]:
-    #         tenant["fetch_options"] = self.construct_fetch_options()
-    #     self.save_json()
-    #
-    # def construct_fetch_options(fetch_scripts: bool = True,
-    #                             fetch_triggers: bool = True,
-    #                             fetch_screens: bool = True,
-    #                             fetch_screen_choosers: bool = True,
-    #                             fetch_scheduled_tasks: bool = True,
-    #                             fetch_extra_tables: bool = True) -> dict:
-    #     """Creates a fetch_options dictionary. All options are defaulted to True."""
-    #     return {
-    #         "fetch_scripts": fetch_scripts,
-    #         "fetch_triggers": fetch_triggers,
-    #         "fetch_screens": fetch_screens,
-    #         "fetch_screen_choosers": fetch_screen_choosers,
-    #         "fetch_scheduled_tasks": fetch_scheduled_tasks,
-    #         "fetch_extra_tables": fetch_extra_tables
-    #     }

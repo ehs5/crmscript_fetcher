@@ -40,7 +40,12 @@ vue
             <el-row>
               <el-col :span="24">
                 <el-space>
-                  <el-button type="primary" round :icon="Plus" @click="handleNewTenant"
+                  <el-button
+                    type="primary"
+                    round
+                    :icon="Plus"
+                    @click="handleNewTenant"
+                    :disabled="isEditing"
                     >New</el-button
                   >
                   <el-button type="info" :icon="DocumentCopy" @click="handleCopyScript" round
@@ -54,7 +59,11 @@ vue
       </el-aside>
 
       <el-main>
-        <TenantForm :tenant="selectedTenant" :isEditing="isEditing" @tenant-created="handleTenantCreatedEvent" />
+        <TenantForm
+          v-model:tenant="selectedTenant"
+          v-model:isEditing="isEditing"
+          @tenant-created="handleTenantCreatedEvent"
+        />
       </el-main>
     </el-container>
   </el-container>
@@ -67,7 +76,6 @@ import { DocumentCopy, Search, Plus } from "@element-plus/icons-vue"
 import { ElMessage } from "element-plus"
 import { useEel } from "@/composables/useEel"
 import TenantForm from "./components/TenantForm.vue"
-
 
 // Refs
 const tenants: Ref<TenantSettings[]> = ref([])
@@ -100,7 +108,10 @@ async function getTenantSettings(): Promise<TenantSettings[]> {
 }
 
 function handleRowClick(row: TenantSettings) {
-  if (isEditing.value) return
+  if (isEditing.value) {
+    ElMessage.info("Please save the current tenant before selecting another")
+    return
+  }
   selectedTenant.value = row
 }
 
@@ -111,7 +122,6 @@ function handleRowClick(row: TenantSettings) {
 function handleTenantCreatedEvent(tenant: TenantSettings) {
   tenants.value.push(tenant)
 }
-
 
 function getDefaultTenant(): TenantSettings {
   return {
@@ -128,7 +138,7 @@ function getDefaultTenant(): TenantSettings {
       fetch_screen_choosers: true,
       fetch_scheduled_tasks: true,
       fetch_extra_tables: true,
-    }
+    },
   }
 }
 
