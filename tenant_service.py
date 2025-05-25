@@ -25,6 +25,11 @@ class TenantService:
 
         return all_tenants
 
+    def get_tenant_by_id(self, tenant_id):
+        all_tenants: list[dict] = self.get_all_tenants(False)
+        tenant_index: int = self.get_tenant_index(all_tenants, tenant_id)
+        return all_tenants[tenant_index]
+
     def add_missing_fetch_options(self, all_tenants: list[dict]) -> list[dict]:
         """
         Checks if there are any tenants without "fetch options", and if so adds a default dictionary to each.
@@ -123,10 +128,3 @@ class TenantService:
         tenant_index: int = self.get_tenant_index(all_tenants, tenant_id)
         all_tenants.pop(tenant_index)
         self.save(all_tenants)
-
-    # # TODO move to frontend
-    # def local_directory_taken(self, tenant_id: int, local_directory: str) -> bool | None:
-    #    """Returns True if another tenant in the tenant settings file uses the given local directory path"""
-    #    for t in self.tenant_settings:
-    #        if (t.get("id") != tenant_id) and (t.get("local_directory") == local_directory):
-    #            return True

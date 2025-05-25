@@ -25,6 +25,7 @@ vue
               </el-col>
               <el-col :span="24">
                 <el-table
+                  ref="tenantTableRef"
                   :data="filteredTenants"
                   @row-click="handleRowClick"
                   :highlight-current-row="true"
@@ -48,7 +49,7 @@ vue
                     :disabled="isEditing"
                     >New</el-button
                   >
-                  <el-button type="info" :icon="DocumentCopy" @click="handleCopyScript" round
+                  <el-button type="info" :icon="DocumentCopy" @click="handleCopyFetcherScript" round
                     >Copy Fetcher Script</el-button
                   >
                 </el-space>
@@ -62,7 +63,9 @@ vue
         <TenantForm
           v-model:tenant="selectedTenant"
           v-model:isEditing="isEditing"
+          :tenants="tenants"
           @tenant-created="handleTenantCreatedEvent"
+          @tenant-deleted="handleTenantDeletedEvent"
         />
       </el-main>
     </el-container>
@@ -70,10 +73,10 @@ vue
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, type Ref, computed, type ComputedRef } from "vue"
+import { onMounted, ref, type Ref, computed, type ComputedRef, watch } from "vue"
 import type { TenantSettings } from "./types/TenantSettings"
 import { DocumentCopy, Search, Plus } from "@element-plus/icons-vue"
-import { ElMessage } from "element-plus"
+import { ElMessage, ElTable } from "element-plus"
 import { useEel } from "@/composables/useEel"
 import TenantForm from "./components/TenantForm.vue"
 
@@ -82,6 +85,7 @@ const tenants: Ref<TenantSettings[]> = ref([])
 const selectedTenant: Ref<TenantSettings | null> = ref(null)
 const searchQuery: Ref<string> = ref("")
 const isEditing: Ref<boolean> = ref(false)
+const tenantTableRef = ref<InstanceType<typeof ElTable> | null>(null)
 
 // useEel let's us call the Python methods
 const eel = useEel()
@@ -102,6 +106,13 @@ const filteredTenants: ComputedRef<TenantSettings[]> = computed(() => {
   )
 })
 
+// Watchers
+/** Watches for changes in selectedTenant and updates the current row in the table */
+watch(
+  () => selectedTenant.value?.id,
+  () => tenantTableRef.value?.setCurrentRow(selectedTenant.value),
+)
+
 // Calls Python which loads tenant settings from JSON
 async function getTenantSettings(): Promise<TenantSettings[]> {
   return await eel.getAllTenants()
@@ -109,10 +120,12 @@ async function getTenantSettings(): Promise<TenantSettings[]> {
 
 function handleRowClick(row: TenantSettings) {
   if (isEditing.value) {
-    ElMessage.info("Please save the current tenant before selecting another")
+    ElMessage.info("You cannot select another tenant while editing")
+    tenantTableRef.value?.setCurrentRow(selectedTenant.value) // Reset the current row to the selected tenant
     return
   }
   selectedTenant.value = row
+  tenantTableRef.value?.setCurrentRow(selectedTenant.value) // Reset the current row to the selected tenant
 }
 
 /**
@@ -121,6 +134,13 @@ function handleRowClick(row: TenantSettings) {
  */
 function handleTenantCreatedEvent(tenant: TenantSettings) {
   tenants.value.push(tenant)
+  tenantTableRef.value?.setCurrentRow(tenant)
+}
+
+/** Deletes the tenant from the list */
+function handleTenantDeletedEvent(tenant: TenantSettings) {
+  tenants.value = tenants.value.filter((t) => t.id !== tenant.id)
+  tenantTableRef.value?.setCurrentRow(null)
 }
 
 function getDefaultTenant(): TenantSettings {
@@ -145,20 +165,22 @@ function getDefaultTenant(): TenantSettings {
 /** Create a new tenant (in screen, not in actual JSON) and sets it as the selected tenant */
 function handleNewTenant() {
   selectedTenant.value = getDefaultTenant()
+  tenantTableRef.value?.setCurrentRow(null)
   isEditing.value = true
 }
 
+/** Initiates fetching */
 function handleFetch() {
   if (!selectedTenant.value) return
   eel.fetchScripts(selectedTenant.value.id)
   ElMessage.info("Fetching scripts...")
 }
 
-async function handleCopyScript() {
-  if (!selectedTenant.value) return
-  const script = await eel.getFetcherScript(selectedTenant.value.id)
-  // TODO: Copy script to clipboard
-  ElMessage.success("Script copied to clipboard")
+/** Gets CRMScript Fetcher from file via Python and copies it to clipboard */
+async function handleCopyFetcherScript() {
+  const script: string = await eel.getFetcherScript()
+  navigator.clipboard.writeText(script)
+  ElMessage.success("Fetcher script copied to clipboard")
 }
 
 onMounted(async () => {

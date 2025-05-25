@@ -2,9 +2,12 @@
 import os
 import sys
 import json
+import tkinter
+import sv_ttk
 import shutil
 from typing import Any
 from pathlib import Path
+from tkinter import filedialog
 from tenacity import retry
 from tenacity import wait_fixed
 from tenacity import stop_after_attempt
@@ -20,6 +23,24 @@ def get_app_directory() -> Path:
         return Path(sys.executable).parent
     # When running from source
     return Path(__file__).resolve().parent
+
+def ask_directory_path() -> str:
+    """
+    Opens a tkinter dialog box and returns the folder path that user selected.
+    """
+    #root = tkinter.Tk
+    #root.withdraw()
+    #sv_ttk.use_light_theme()
+    return filedialog.askdirectory() #TODO How's this looking on Windows?
+
+
+def get_fetcher_script() -> str:
+    """
+    Opens crmscript-fetcher.crmscript file and returns the contents.
+    """
+    file_path: Path = get_app_directory() / "crmscript-fetcher.crmscript"
+    with open(file_path) as f:
+        return f.read()
 
 def safe_name(text: str) -> str:
     """Replace characters that are not allowed in Windows folders/files"""

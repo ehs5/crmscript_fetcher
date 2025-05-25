@@ -5,15 +5,11 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
+  font-family: "Inter", sans-serif;
 }
 
 #app {
-  font-family: "Inter", sans-serif;
   height: 100%;
-}
-
-.el-message {
-  font-family: "Inter", sans-serif;
 }
 
 .el-dialog {
@@ -23,4 +19,14 @@ body {
 .el-dialog__header {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+}
+
+.el-message-box {
+  border-radius: 16px;
+}
+
+/** Reverses button order on ElMessageBoxes */
+.el-message-box__btns {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
 }

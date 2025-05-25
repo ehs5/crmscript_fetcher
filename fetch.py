@@ -62,18 +62,41 @@ class Fetch:
 
         return self.crmscript_version
 
-    def fetch(self) -> bool:
+    def fetch(self) -> dict:
         """
-        Main fetch method
-        Returns true if CRMScripts were fetched and folders/files were created successfully
+        Main fetch method that handles the complete fetch operation.
+        Returns structured response with success status, errors and version info.
         """
-        print(f"Getting JSON data from SuperOffice using endpoint: {self.script_url}")
-        self.get_json_from_superoffice()
-        if not self.data:
-            return False
+        try:
+            if validation_error := self.validate_tenant():
+                return {
+                    "success": False,
+                    "validation_error": True,
+                    "error": validation_error
+                }
 
-        self.determine_script_version()
+            self.get_json_from_superoffice()
+            if not self.data:
+                return {
+                    "success": False,
+                    "error": self.last_error or "Failed to fetch data"
+                }
 
-        # Create data in local directory based on data fetched from SuperOffice
-        data_creator = DataCreator(self.data, self.crmscript_version, self.tenant)
-        return data_creator.create()
+            self.determine_script_version()
+
+            # Create data in local directory
+            data_creator = DataCreator(self.data, self.crmscript_version, self.tenant)
+            success = data_creator.create()
+
+            return {
+                "success": success,
+                "error": self.last_error if not success else None,
+                "crmscript_version": self.crmscript_version,
+                "current_version": CURRENT_CRMSCRIPT_VERSION
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }

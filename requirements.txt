@@ -14,3 +14,5 @@ tenacity==9.1.2
 typing_extensions==4.13.2
 zope.event==5.0
 zope.interface==7.2
+
+requests~=2.32.3
