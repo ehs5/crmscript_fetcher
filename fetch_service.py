@@ -62,7 +62,9 @@ class FetchService:
             print("JSON fetched!")
             return data, ""
         except json.JSONDecodeError as e:
-            error: str = f"Invalid JSON response from server: {str(e)}"
+            error: str = (f"Invalid JSON response from server<br><br>Contacting URL: {script_url}<br<br>"
+                          f"{str(e)}<br><br>"
+                          f"GET returned body:<br>{response.text}")
             print(error)
             return None, error
 
@@ -90,8 +92,8 @@ class FetchService:
             errors.append("You must check at least one fetch option")
 
         if errors:
-            return "Can not fetch CRMScripts because tenant settings are invalid:\n" + \
-                "\n".join(f"- {error}" for error in errors)
+            return "Can not fetch CRMScripts because tenant settings are invalid:<br>" + \
+                "<br>".join(f"- {error}" for error in errors)
 
         return ""
 

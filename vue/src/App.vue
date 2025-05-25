@@ -169,13 +169,6 @@ function handleNewTenant() {
   isEditing.value = true
 }
 
-/** Initiates fetching */
-function handleFetch() {
-  if (!selectedTenant.value) return
-  eel.fetchScripts(selectedTenant.value.id)
-  ElMessage.info("Fetching scripts...")
-}
-
 /** Gets CRMScript Fetcher from file via Python and copies it to clipboard */
 async function handleCopyFetcherScript() {
   const script: string = await eel.getFetcherScript()

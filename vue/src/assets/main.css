@@ -23,10 +23,24 @@ body {
 
 .el-message-box {
   border-radius: 16px;
+  padding: 12px;
+  min-width: 30%;
+  max-width: 480px;
+}
+
+.el-message-box__content {
+  padding: 20px 12px;
+  line-height: 1.5;
+}
+
+.el-message-box__container {
+  margin-bottom: 12px;
 }
 
 /** Reverses button order on ElMessageBoxes */
 .el-message-box__btns {
   flex-direction: row-reverse;
   justify-content: flex-start;
+  padding: 12px 0 0;
+  gap: 12px;
 }
