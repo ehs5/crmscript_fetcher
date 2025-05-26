@@ -5,6 +5,7 @@ from fetch_service import FetchService
 from tenant_service import TenantService
 from utility import get_fetcher_script
 from utility import ask_directory_path
+from utility import open_directory
 
 # Exposing Tenant Service methods
 tenant_service = TenantService()
@@ -20,3 +21,4 @@ eel.expose(fetch_service.fetch)
 # Utility methods
 eel.expose(get_fetcher_script)
 eel.expose(ask_directory_path)
+eel.expose(open_directory)

@@ -5,6 +5,8 @@ import json
 import tkinter
 import sv_ttk
 import shutil
+import platform
+import subprocess
 from typing import Any
 from pathlib import Path
 from tkinter import filedialog
@@ -41,6 +43,17 @@ def get_fetcher_script() -> str:
     file_path: Path = get_app_directory() / "crmscript-fetcher.crmscript"
     with open(file_path) as f:
         return f.read()
+
+
+def open_directory(directory_path: str):
+    """Opens the folder in user's OS. Handles both Windows and Linux."""
+    path = Path(directory_path).resolve()
+    system: str = platform.system()
+
+    if system == "Windows":
+        subprocess.Popen(f'explorer "{str(path)}"')
+    elif system == "Linux":
+        subprocess.Popen(["xdg-open", str(path)])
 
 def safe_name(text: str) -> str:
     """Replace characters that are not allowed in Windows folders/files"""

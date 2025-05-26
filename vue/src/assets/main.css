@@ -12,6 +12,10 @@ body {
   height: 100%;
 }
 
+#fetch-options-dialog {
+  max-width: 300px;
+}
+
 .el-dialog {
   border-radius: 16px;
 }
