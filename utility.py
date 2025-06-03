@@ -1,9 +1,9 @@
 # Functions for handling local files and folders
 import os
 import sys
+import toml
 import json
 import tkinter
-import sv_ttk
 import shutil
 import platform
 import subprocess
@@ -28,19 +28,22 @@ def get_app_directory() -> Path:
 
 def ask_directory_path() -> str:
     """
-    Opens a tkinter dialog box and returns the folder path that user selected.
+    Opens a Tkinter dialog box in front of the Eel window and returns the folder path the user selected.
+    Ensures it stays on top on Windows.
     """
-    #root = tkinter.Tk
-    #root.withdraw()
-    #sv_ttk.use_light_theme()
-    return filedialog.askdirectory() #TODO How's this looking on Windows?
+    root = tkinter.Tk()
+    root.withdraw()                   # Hide the root window
+    root.attributes('-topmost', True) # Appear on top of browser window
+    folder: str = filedialog.askdirectory(parent=root)
+    root.destroy()
+    return folder
 
 
 def get_fetcher_script() -> str:
     """
-    Opens crmscript-fetcher.crmscript file and returns the contents.
+    Opens crmscript_fetcher.crmscript file and returns the contents.
     """
-    file_path: Path = get_app_directory() / "crmscript-fetcher.crmscript"
+    file_path: Path = get_app_directory() / "crmscript_fetcher.crmscript"
     with open(file_path) as f:
         return f.read()
 
@@ -113,8 +116,9 @@ def create_file(directory: str, file_name: str, body: str) -> None:
     full_path: str = f"{directory}/{file_name}"
     
     """ Normalize newlines """
-    body = body.replace("\r\n", "\n")
-    body = body.replace("\n", "\r\n")
+    # TODO: What to do here? This fix caused every line to be two linebreaks, in Windows at least
+    # body = body.replace("\r\n", "\n")
+    # body = body.replace("\n", "\r\n")
 
     with open(full_path, "w", encoding="utf-8") as f:
         f.write(body)
@@ -126,3 +130,10 @@ def create_json_file(directory: str, file_name: str, content: Any) -> None:
     full_path: str = f"{directory}/{file_name}"
     with open(full_path, "w", encoding="utf8") as f:
         json.dump(content, f, indent=4, ensure_ascii=False)
+
+
+def get_current_version() -> str:
+    """Returns the version of CRMScript Fetcher from pyproject.toml file."""
+    pyproject_path: Path = get_app_directory() / "pyproject.toml"
+    pyproject: dict = toml.load(pyproject_path)
+    return pyproject["project"]["version"]

@@ -5,7 +5,10 @@ import type { TenantSettings } from "@/types/TenantSettings"
  * Interface defining all available methods exposed in Python via Eel.
  * Each method returns a function that returns a Promise, hence the two ()()s.
  */
-interface Eel {
+export interface Eel {
+  // The localhost path to the eel server
+  _host: string
+
   // Tenant settings CRUD methods
   get_all_tenants(initial_load?: boolean): () => Promise<TenantSettings[]>
   update_tenant(tenant: TenantSettings): () => Promise<void>
@@ -19,6 +22,7 @@ interface Eel {
   get_fetcher_script(): () => Promise<string>
   ask_directory_path(): () => Promise<string>
   open_directory(directory_path: string): () => Promise<void>
+  get_current_version(): () => Promise<string>
 }
 
 // Tell TypeScript that 'eel' exists (it's been imported in index.html)
@@ -38,5 +42,6 @@ export function useEel() {
     getFetcherScript: () => eel.get_fetcher_script()(),
     askDirectoryPath: () => eel.ask_directory_path()(),
     openDirectory: (directory_path: string) => eel.open_directory(directory_path)(),
+    getCurrentVersion: () => eel.get_current_version()(),
   }
 }

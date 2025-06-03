@@ -60,7 +60,7 @@ errors. Usually this works itself out by running the fetch again.
 
 
 - A local PC running Windows
-  - Tested on Windows 10 and 11 only.
+  - Tested on Windows 11 only.
 
 ## Getting Started
 
@@ -74,12 +74,12 @@ errors. Usually this works itself out by running the fetch again.
 1. Run CRMScript Fetcher.exe
 
 
-2. Click the "Copy Fetcher script to clipboard" button.
+2. Click the "Copy Fetcher Script" button.
 Alternatively, open "CRMScript Fetcher.crmscript" in a text editor, and copy the contents from there.
 
 
 3. In your SuperOffice installation, create a new script and paste the contents.
-Give it an "include name" (e.g. "crmscript_fetcher") and a secret key.
+Give it an "include name" (e.g. "crmscript-fetcher") and a secret key.
 
 
 4. Click "Add tenant"
@@ -103,36 +103,30 @@ All your tenant settings will be saved locally in the tenant_settings.json file.
 ## Quick Dev Guide
 
 ### Development
-1. In `vue/index.html`, comment/uncomment the right sections:
-```html
-<!-- Production mode -->
-<!--<script type="text/javascript" src="http://localhost:8686/eel.js"></script>-->
-<!-- Production mode end -->
+There is code in main.ts that makes sure you can use **npm run dev** while the Eel server is running via
+your Python IDE.
 
-<!-- Development mode start -->
-<script type="text/javascript" src="http://localhost:8686/eel.js"></script>
-<script type="text/javascript"> eel._host = "http://localhost:8686"</script>
-<!-- Development mode end -->
-```
-
-2. Run `main.py` in your Python IDE.
+1. Run `main.py` in your Python IDE.
 This makes the Python backend run on `http://localhost:8686`.
-This will show you the frontend that already has been built, not the frontend that is currently in development.
+This will show you the frontend that already has been built, **not** the frontend that is currently in development.
 Keep this window open.
 
 
-3. Start Vue:
+2. In your Vue folder, start Vue:
 ```bash
 npm run dev
 ```
-App should now run on `http://localhost:5173` (or another port) with hot reload.
+App should now run on `http://localhost:5173` (usually).
 
 ### How to Build
-1. Switch the comments in `index.html` back to production mode
-2. `npm run build`
-3. Package with PyInstaller
+1. `npm run build`
+2. Package Python code with PyInstaller:
 
-[TODO: Add PyInstaller commands]
+```bash
+python -m eel main.py vue --onedir --noconsole --icon=icon.ico --name "CRMScript Fetcher" --add-data "tenant_settings.json;." --add-data "crmscript_fetcher.crmscript;."
+```
+
+This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.exe file in it.
 
 ## Built With
 
