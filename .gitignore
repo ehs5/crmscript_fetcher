@@ -1,5 +1,4 @@
-dist/
 build/
 Icon mockups/
-spec_crmscript_fetcher.spec
 notes.txt
+dist/
