@@ -57,6 +57,8 @@ def open_directory(directory_path: str):
         subprocess.Popen(f'explorer "{str(path)}"')
     elif system == "Linux":
         subprocess.Popen(["xdg-open", str(path)])
+    elif system == "Darwin":  # macOS
+        subprocess.Popen(["open", str(path)])
 
 def safe_name(text: str) -> str:
     """Replace characters that are not allowed in Windows folders/files"""

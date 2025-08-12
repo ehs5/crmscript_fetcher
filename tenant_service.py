@@ -4,7 +4,7 @@ from utility import get_app_directory
 
 class TenantService:
     """
-    Service class for reading and saving the tenant_settings.json file.
+    Used for reading and saving the tenant_settings.json file.
     """
     def __init__(self):
         self.tenant_settings_filename = get_app_directory() / "tenant_settings.json"

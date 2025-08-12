@@ -22,7 +22,7 @@ When fetching, it will create the following folders inside your chosen directory
 Inside these folders, scripts will be created as files with a .crmscript file extension.
 Metadata will be created as .json files. 
 
-CRMScript Fetcher aims to recreate the same folder structure as you see in SuperOffice, as much as possible.
+CRMScript Fetcher aims to recreate the same folder structure as you see in SuperOffice, as far as possible.
 
 ## Important to know
 
@@ -66,21 +66,17 @@ errors. Usually this works itself out by running the fetch again.
 
 1. Head over to Releases on the right-hand side to download. 
 
-
 2. Unpack the zip file wherever you want
 
 ## How to use
 
 1. Run CRMScript Fetcher.exe
 
-
 2. Click the "Copy Fetcher Script" button.
 Alternatively, open "CRMScript Fetcher.crmscript" in a text editor, and copy the contents from there.
 
-
 3. In your SuperOffice installation, create a new script and paste the contents.
 Give it an "include name" (e.g. "crmscript-fetcher") and a secret key.
-
 
 4. Click "Add tenant"
    - Tenant name: Friendly name of the installation
@@ -89,10 +85,8 @@ https://online.superoffice.com/CustXXXXX/CS
    - Script include ID: Your include name
    - Script key: Your secret key
    - Local directory: Click Browse to pick your directory where the folders will be created.
-   
 
 5. Click Save settings
-
 
 6. Click Fetch CRMScripts to fetch!
 
@@ -111,7 +105,6 @@ This makes the Python backend run on `http://localhost:8686`.
 This will show you the frontend that already has been built, **not** the frontend that is currently in development.
 Keep this window open.
 
-
 2. In your Vue folder, start Vue:
 ```bash
 npm run dev
@@ -119,11 +112,11 @@ npm run dev
 App should now run on `http://localhost:5173` (usually).
 
 ### How to Build
-1. `npm run build`
-2. Package Python code with PyInstaller:
+1. From vue folder, run: `npm run build`
+2. From root folder, package Python code with Eeel's PyInstaller:
 
 ```bash
-python -m eel main.py vue --onedir --noconsole --icon=icon.ico --name "CRMScript Fetcher" --add-data "tenant_settings.json;." --add-data "crmscript_fetcher.crmscript;."
+python -m eel main.py vue --onedir --noconsole --icon=icon.ico --name "CRMScript Fetcher" --add-data "tenant_settings.json;." --add-data "crmscript_fetcher.crmscript;." --add-data "pyproject.toml;."
 ```
 
 This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.exe file in it.

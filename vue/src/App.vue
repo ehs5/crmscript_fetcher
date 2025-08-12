@@ -61,7 +61,7 @@
 
       <!-- Main tenant form -->
       <el-main>
-        <el-text v-if="formTenant" size="large" tag="h2" style="min-height: 40px">
+        <el-text v-if="formTenant" size="large" tag="h2" id="tenant-name">
           {{ selectedTenant?.tenant_name }}
         </el-text>
 
@@ -305,8 +305,8 @@ watch(
 )
 
 // Calls Python which loads tenant settings from JSON
-async function getTenantSettings(): Promise<TenantSettings[]> {
-  return await eel.getAllTenants()
+async function getTenantSettings(initialLoad: boolean = false): Promise<TenantSettings[]> {
+  return await eel.getAllTenants(initialLoad)
 }
 
 function handleRowClick(row: TenantSettings) {
@@ -581,7 +581,7 @@ async function handleDeleteTenant() {
 }
 
 onMounted(async () => {
-  allTenants.value = await getTenantSettings()
+  allTenants.value = await getTenantSettings(true)
 
   // Inject CRMScript Fetcher version into the page title
   const currentVersion: string = await eel.getCurrentVersion()
@@ -626,6 +626,11 @@ onMounted(async () => {
 #tenant-list-footer {
   padding: 20px;
   border-top: 1px solid var(--el-border-color-light);
+}
+
+#tenant-name {
+  min-height: 40px;
+  cursor: default;
 }
 
 .tenant-search {
