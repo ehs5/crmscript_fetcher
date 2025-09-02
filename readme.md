@@ -124,7 +124,9 @@ This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.exe file
 ## Built With
 
 - Python
-- CRMScript
+- Eel - a framework that lets frontend interact with Python code via a local web server
+- Vue.js
+- CRMScript (fetcher script)
 
 ## Authors
 
