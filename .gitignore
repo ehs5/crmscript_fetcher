@@ -1,3 +1,5 @@
 build/
 Icon mockups/
 dist/
+__pycache__
+data_creation/__pycache__
