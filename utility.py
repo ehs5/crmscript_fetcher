@@ -1,12 +1,64 @@
 # Functions for handling local files and folders
 import os
+import sys
+import toml
 import json
+import tkinter
 import shutil
+import platform
+import subprocess
 from typing import Any
+from pathlib import Path
+from tkinter import filedialog
 from tenacity import retry
 from tenacity import wait_fixed
 from tenacity import stop_after_attempt
 
+
+def get_app_directory() -> Path:
+    """
+    Returns the correct path that crmscript fetcher resides in
+    regardless of whether its run as a .exe or in a code editor, and regardless of OS
+    """
+    # When ran as .exe bundled by PyInstaller
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).parent
+    # When running from source
+    return Path(__file__).resolve().parent
+
+def ask_directory_path() -> str:
+    """
+    Opens a Tkinter dialog box in front of the Eel window and returns the folder path the user selected.
+    Ensures it stays on top on Windows.
+    """
+    root = tkinter.Tk()
+    root.withdraw()                   # Hide the root window
+    root.attributes('-topmost', True) # Appear on top of browser window
+    folder: str = filedialog.askdirectory(parent=root)
+    root.destroy()
+    return folder
+
+
+def get_fetcher_script() -> str:
+    """
+    Opens crmscript_fetcher.crmscript file and returns the contents.
+    """
+    file_path: Path = get_app_directory() / "crmscript_fetcher.crmscript"
+    with open(file_path) as f:
+        return f.read()
+
+
+def open_directory(directory_path: str):
+    """Opens the folder in user's OS. Handles both Windows and Linux."""
+    path = Path(directory_path).resolve()
+    system: str = platform.system()
+
+    if system == "Windows":
+        subprocess.Popen(f'explorer "{str(path)}"')
+    elif system == "Linux":
+        subprocess.Popen(["xdg-open", str(path)])
+    elif system == "Darwin":  # macOS
+        subprocess.Popen(["open", str(path)])
 
 def safe_name(text: str) -> str:
     """Replace characters that are not allowed in Windows folders/files"""
@@ -66,8 +118,9 @@ def create_file(directory: str, file_name: str, body: str) -> None:
     full_path: str = f"{directory}/{file_name}"
     
     """ Normalize newlines """
-    body = body.replace("\r\n", "\n")
-    body = body.replace("\n", "\r\n")
+    # TODO: What to do here? This fix caused every line to be two linebreaks, in Windows at least
+    # body = body.replace("\r\n", "\n")
+    # body = body.replace("\n", "\r\n")
 
     with open(full_path, "w", encoding="utf-8") as f:
         f.write(body)
@@ -79,3 +132,10 @@ def create_json_file(directory: str, file_name: str, content: Any) -> None:
     full_path: str = f"{directory}/{file_name}"
     with open(full_path, "w", encoding="utf8") as f:
         json.dump(content, f, indent=4, ensure_ascii=False)
+
+
+def get_current_version() -> str:
+    """Returns the version of CRMScript Fetcher from pyproject.toml file."""
+    pyproject_path: Path = get_app_directory() / "pyproject.toml"
+    pyproject: dict = toml.load(pyproject_path)
+    return pyproject["project"]["version"]

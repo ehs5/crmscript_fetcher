@@ -1,0 +1,17 @@
+[project]
+name = "crmscript-fetcher"
+version = "2.0.0"
+description = "GUI tool that fetches CRMScripts from your SuperOffice installations and creates them as files and folders on your PC."
+authors = [
+    {name = "Espen Steen"}
+]
+license = {text = "MIT license"}
+readme = "readme.md"
+requires-python = ">=3.10"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
