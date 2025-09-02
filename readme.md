@@ -3,9 +3,10 @@
 CRMScript Fetcher is a GUI tool that can download CRMScripts and other data from your 
 SuperOffice installations, and create the data as files within a 
 folder structure on your local PC.
- ![alt text](https://repository-images.githubusercontent.com/463300828/47a6dff7-5790-4a8a-982e-48a918f0a431)
+<img width="978" height="892" alt="image" src="https://github.com/user-attachments/assets/8c939f0b-8aca-4cf6-b976-a7660d66366a" />
 
 ## About
+
 
 CRMScript Fetcher is useful for downloading your current scripts and other data such as screens
 and scheduled tasks into a local repository, which you then may use for pushing into GitHub/Gitlab etc. 
