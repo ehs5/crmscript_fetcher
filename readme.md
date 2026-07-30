@@ -116,11 +116,20 @@ App should now run on `http://localhost:5173` (usually).
 1. From vue folder, run: `npm run build`
 2. From root folder, package Python code with Eeel's PyInstaller:
 
+**Windows:**
 ```bash
-python -m eel main.py vue --onedir --noconsole --icon=icon.ico --name "CRMScript Fetcher" --add-data "tenant_settings.json;." --add-data "crmscript_fetcher.crmscript;." --add-data "pyproject.toml;."
+python -m eel main.py vue/dist --onedir --noconsole --icon=icon.ico --name "CRMScript Fetcher" --add-data "tenant_settings.json;." --add-data "crmscript_fetcher.crmscript;." --add-data "pyproject.toml;."
 ```
 
 This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.exe file in it.
+
+**macOS:**
+
+```bash
+python -m eel main.py vue/dist --onedir --noconsole --icon=icon.icns --name "CRMScript Fetcher" --add-data "tenant_settings.json:." --add-data "crmscript_fetcher.crmscript:." --add-data "pyproject.toml:."
+```
+
+This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.app bundle in it. Note the `:` instead of `;` in `--add-data`, and `icon.icns` instead of `icon.ico` — both are macOS/Windows conventions respectively (PyInstaller can't cross-compile, so this must be run natively on each OS).
 
 ## Built With
 

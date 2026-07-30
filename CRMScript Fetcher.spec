@@ -1,44 +1,51 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
-block_cipher = None
+a = Analysis(
+    ['main.py'],
+    pathex=[],
+    binaries=[],
+    datas=[('/Users/espen/dev/work/crmscript_fetcher/.venv/lib/python3.11/site-packages/eel/eel.js', 'eel'), ('vue/dist', 'vue/dist'), ('tenant_settings.json', '.'), ('crmscript_fetcher.crmscript', '.'), ('pyproject.toml', '.')],
+    hiddenimports=['bottle_websocket'],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    noarchive=False,
+    optimize=0,
+)
+pyz = PYZ(a.pure)
 
-
-a = Analysis(['main.py'],
-             pathex=[],
-             binaries=[],
-             datas=[('C:\\Users\\espen\\PycharmProjects\\crmscript_fetcher\\venv\\lib\\site-packages\\eel\\eel.js', 'eel'), ('vue', 'vue'), ('tenant_settings.json', '.'), ('crmscript_fetcher.crmscript', '.'), ('pyproject.toml', '.')],
-             hiddenimports=['bottle_websocket'],
-             hookspath=[],
-             hooksconfig={},
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher,
-             noarchive=False)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
-
-exe = EXE(pyz,
-          a.scripts, 
-          [],
-          exclude_binaries=True,
-          name='CRMScript Fetcher',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          console=False,
-          disable_windowed_traceback=False,
-          target_arch=None,
-          codesign_identity=None,
-          entitlements_file=None , icon='icon.ico')
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas, 
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='CRMScript Fetcher')
+exe = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name='CRMScript Fetcher',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon=['icon.icns'],
+)
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='CRMScript Fetcher',
+)
+app = BUNDLE(
+    coll,
+    name='CRMScript Fetcher.app',
+    icon='icon.icns',
+    bundle_identifier=None,
+)

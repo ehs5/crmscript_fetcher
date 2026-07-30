@@ -22,7 +22,7 @@ def get_app_directory() -> Path:
     """
     # When ran as .exe bundled by PyInstaller
     if getattr(sys, 'frozen', False):
-        return Path(sys.executable).parent
+        return Path(sys._MEIPASS)
     # When running from source
     return Path(__file__).resolve().parent
 

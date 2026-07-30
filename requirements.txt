@@ -1,7 +1,7 @@
 altgraph==0.17.4
 bottle==0.13.3
 bottle-websocket==0.2.9
-Eel==0.18.1
+Eel==0.18.2
 future~=0.18.2
 gevent==25.5.1
 gevent-websocket==0.10.1
@@ -10,6 +10,7 @@ packaging==25.0
 pyinstaller==6.13.0
 pyinstaller-hooks-contrib==2025.4
 pyparsing==3.2.3
+setuptools>=70.0.0,<82  # eel/__main__.py (the `python -m eel` build CLI) imports pkg_resources, which setuptools 82+ removed entirely
 tenacity~=8.1.0
 typing_extensions==4.13.2
 zope.event==5.0
