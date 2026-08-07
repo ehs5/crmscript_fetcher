@@ -44,11 +44,11 @@ _VERSION_LINE = f"  v{get_current_version()} - https://github.com/ehs5/crmscript
 BANNER = (
     f"{_LOGO}\n\n"
     f"{_VERSION_LINE}\n\n"
-    "First run? Point crmfetch at a tenant_settings.json file before anything else:\n"
+    "  First run? Point crmfetch at a tenant_settings.json file before anything else:\n"
     "  - If the CRMScript Fetcher GUI is already installed, find its\n"
     "    tenant_settings.json and run: crmfetch settings set <path>\n"
     "  - Otherwise, create a fresh one: crmfetch settings init <path>\n\n"
-    "Run a command with --help for its details, e.g. 'crmfetch add --help'."
+    "  Run a command with --help for its details, e.g. 'crmfetch add --help'."
 )
 
 
@@ -61,7 +61,10 @@ def _print_splash() -> int:
     # to go next. No docstring here on purpose: cyclopts would otherwise
     # render it as the app's own description text.
     app.help_prologue = f"{_LOGO}\n\n{_VERSION_LINE}"
-    app.help_epilogue = "Start here: run 'crmfetch --help'."
+    app.help_epilogue = (
+        "Start here: run 'crmfetch --help'.\n"
+        "Run a command with --help for its details, e.g. 'crmfetch add --help'."
+    )
     # Version's already right there in the banner above - no need to also
     # list --version as an option on the splash specifically.
     app["--version"].show = False
