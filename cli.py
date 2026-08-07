@@ -56,7 +56,11 @@ _LOGO = """
 # get_current_version() is called once here, at CLI startup - each `crmfetch`
 # invocation is a fresh process, so this always reflects the installed
 # pyproject.toml, same as --version does.
-BANNER = f"{_LOGO}\n\n  v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher"
+BANNER = (
+    f"{_LOGO}\n\n"
+    f"  v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher\n\n"
+    "Run a command with --help for its details, e.g. 'crmfetch add --help'."
+)
 
 app = cyclopts.App(
     name="crmfetch",
@@ -467,6 +471,13 @@ def settings_path_command() -> int:
 # after fetch, rather than alphabetically after list).
 for _sort_key, _command_name in enumerate(["add", "delete", "edit", "fetch", "show", "list", "settings"]):
     app[_command_name].sort_key = _sort_key
+    # help_prologue would otherwise be inherited from app onto every
+    # subcommand's own --help too - fine for `crmfetch -h` itself, but the
+    # banner doesn't need repeating on every single subcommand's help page.
+    # Setting it here on `settings` also covers its own set/init/path
+    # children, since they inherit from their nearest ancestor with an
+    # explicit override.
+    app[_command_name].help_prologue = ""
 
 
 def main(argv: list[str] | None = None) -> None:
