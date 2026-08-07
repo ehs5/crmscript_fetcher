@@ -94,6 +94,9 @@ app = cyclopts.App(
 _options_group = cyclopts.Group("Options")
 app["--help"].group = _options_group
 app["--version"].group = _options_group
+# The default text is generic ("Display this message and exit.") - this is
+# the one thing a first-time caller (human or agent) needs pointed at.
+app["--help"].help = "Start here - shows setup instructions and every command."
 
 # Left unset at import time - built lazily by _resolve_tenant_service() from
 # the CLI's own settings pointer (cli_config.py) the first time a command
