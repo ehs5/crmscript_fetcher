@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Blocked by: 01
 
 # Replace Eel with pywebview in the GUI
