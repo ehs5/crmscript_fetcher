@@ -26,10 +26,31 @@ def get_app_directory() -> Path:
     # When running from source
     return Path(__file__).resolve().parent
 
-def ask_directory_path() -> str:
+def ask_directory_path_macos() -> str:
     """
-    Opens a Tkinter dialog box in front of the Eel window and returns the folder path the user selected.
-    Ensures it stays on top on Windows.
+    Uses AppleScript's native folder chooser instead of Tkinter.
+    Tkinter's Cocoa/NSApplication integration doesn't tear down and
+    reinitialize cleanly between calls on macOS, which is what causes
+    the picker to misbehave (jump around, fail to close, refuse to reopen)
+    when a fresh Tk root is created and destroyed on every call.
+    """
+    script = 'POSIX path of (choose folder with prompt "Select a folder")'
+    try:
+        result = subprocess.run(
+            ["osascript", "-e", script],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        # User cancelled the dialog
+        return ""
+
+
+def ask_directory_path_tk() -> str:
+    """
+    Used for Windows and Linux.
     """
     root = tkinter.Tk()
     root.withdraw()                   # Hide the root window
@@ -37,6 +58,16 @@ def ask_directory_path() -> str:
     folder: str = filedialog.askdirectory(parent=root)
     root.destroy()
     return folder
+
+
+def ask_directory_path() -> str:
+    """
+    Opens a native folder picker and returns the folder path the user selected.
+    Returns an empty string if the user cancels.
+    """
+    if platform.system() == "Darwin":
+        return ask_directory_path_macos()
+    return ask_directory_path_tk()
 
 
 def get_fetcher_script() -> str:
