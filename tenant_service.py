@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+
 from utility import get_app_directory
 
 
@@ -6,8 +8,14 @@ class TenantService:
     """
     Used for reading and saving the tenant_settings.json file.
     """
-    def __init__(self):
-        self.tenant_settings_filename = get_app_directory() / "tenant_settings.json"
+    def __init__(self, settings_path: Path | None = None):
+        """
+        With no argument, resolves the bundled default next to the running
+        code (get_app_directory()) - this is what the GUI relies on and must
+        keep working exactly as-is. Pass settings_path to point at a specific
+        file instead, e.g. the CLI's own configured pointer (see cli_config.py).
+        """
+        self.tenant_settings_filename = settings_path or get_app_directory() / "tenant_settings.json"
 
     def get_all_tenants(self, initial_load: bool = False) -> list[dict]:
         """"

@@ -150,3 +150,41 @@ def test_get_all_tenants_without_initial_load_does_not_backfill(
     tenants: list[dict] = service.get_all_tenants(initial_load=False)
 
     assert tenants[0].get("fetch_options") is None
+
+
+def test_explicit_settings_path_is_used_directly(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    An explicit settings_path must be used as-is, bypassing get_app_directory()
+    entirely - this is the CLI's pointer feature (ticket 05), which must never
+    fall back to the bundled default TenantService()'s no-argument constructor
+    resolves for the GUI.
+    """
+    explicit_path: Path = tmp_path / "somewhere-else" / "pointed_at.json"
+    explicit_path.parent.mkdir()
+    explicit_path.write_text(json.dumps([{"id": 1, "tenant_name": "Pointed", "url": "https://pointed.example"}]))
+
+    def fail_if_called() -> Path:
+        raise AssertionError("get_app_directory() must not be called when an explicit path is given")
+
+    monkeypatch.setattr("tenant_service.get_app_directory", fail_if_called)
+
+    service = TenantService(explicit_path)
+
+    assert service.tenant_settings_filename == explicit_path
+    assert service.get_all_tenants()[0]["tenant_name"] == "Pointed"
+
+
+def test_no_argument_constructor_still_resolves_via_get_app_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """
+    Confirms TenantService() with no arguments is unaffected by the optional
+    settings_path parameter - this is the GUI's own default and must keep
+    resolving via get_app_directory() exactly as before.
+    """
+    monkeypatch.setattr("tenant_service.get_app_directory", lambda: tmp_path)
+    (tmp_path / "tenant_settings.json").write_text("[]")
+
+    service = TenantService()
+
+    assert service.tenant_settings_filename == tmp_path / "tenant_settings.json"

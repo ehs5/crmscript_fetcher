@@ -7,6 +7,11 @@ cli.py calls into. Per the spec's Testing Decisions, this is the CLI seam
 only: it confirms each command's flags map onto the correct core call with
 the correct arguments, not business-logic correctness (that's covered at the
 core seam in test_tenant_service.py / test_fetch_service.py).
+
+The tenant_service fixture below bypasses cli's lazy pointer resolution
+entirely by pre-seeding cli.tenant_service with a Mock - see
+test_cli_settings.py for tests that exercise that resolution (the
+no-pointer-configured error path, and the real pointer -> real file path).
 """
 import json
 from unittest.mock import Mock
@@ -15,12 +20,13 @@ import pytest
 
 import cli
 import utility
+from tenant_service import TenantService
 
 
 @pytest.fixture(autouse=True)
 def tenant_service(monkeypatch: pytest.MonkeyPatch) -> Mock:
-    """Replaces every method on cli's TenantService singleton with a Mock."""
-    service = Mock(spec=cli.tenant_service)
+    """Replaces cli's module-level TenantService singleton with a spec'd Mock."""
+    service = Mock(spec=TenantService)
     monkeypatch.setattr(cli, "tenant_service", service)
     return service
 

@@ -7,13 +7,42 @@ for the full command surface and the decisions behind it.
 """
 import json
 import sys
+from pathlib import Path
 from typing import Annotated
 
 import cyclopts
 
+from cli_config import CliConfig
 from fetch_service import FetchService
 from tenant_service import TenantService
 from utility import get_current_version
+
+# Matches tenant_settings.json's shipped template exactly - `settings init`
+# writes this same content to a fresh file the CLI is pointed at.
+DEFAULT_TENANT_SETTINGS: list[dict] = [
+    {
+        "id": 1,
+        "include_id": "crmscript_fetcher",
+        "key": "yourUniqueKeyHere",
+        "local_directory": "C:/My directory",
+        "tenant_name": "Example tenant",
+        "url": "https://online.superoffice.com/CustXXXXX/CS",
+        "fetch_options": {
+            "fetch_scripts": True,
+            "fetch_triggers": True,
+            "fetch_screens": True,
+            "fetch_screen_choosers": True,
+            "fetch_scheduled_tasks": True,
+            "fetch_extra_tables": True,
+        },
+    }
+]
+
+_NO_SETTINGS_MESSAGE = (
+    "No active tenant_settings.json is configured. "
+    "Run 'crmfetch settings set <path>' to point at an existing file, "
+    "or 'crmfetch settings init <path>' to create a fresh one."
+)
 
 BANNER = """
                        __     _       _
@@ -32,9 +61,29 @@ app = cyclopts.App(
     # Without this, cyclopts renders help_prologue as Markdown, which
     # collapses the banner's line breaks into one line.
     help_format="plaintext",
+    # The Commands panel below already shows everything there is to run;
+    # a top-level "Usage: crmfetch COMMAND" line adds nothing on top of it.
+    # Subcommands (e.g. `crmfetch fetch --help`) keep their own usage line,
+    # since those actually show argument syntax.
+    usage="",
 )
 
-tenant_service = TenantService()
+# --help/--version are cyclopts' own auto-registered commands, with no group
+# assigned by default - which otherwise dumps them into the same "Commands"
+# panel as add/delete/edit/fetch/list/show, blurring flags with commands.
+_options_group = cyclopts.Group("Options")
+app["--help"].group = _options_group
+app["--version"].group = _options_group
+# --help itself doesn't need to be listed - if you're reading this listing,
+# you've already found it.
+app["--help"].show = False
+
+# Left unset at import time - built lazily by _resolve_tenant_service() from
+# the CLI's own settings pointer (cli_config.py) the first time a command
+# actually needs it. Never falls back to TenantService()'s bundled-default
+# path; that path is the GUI's, and using it here is exactly the bug this
+# pointer exists to fix (see ticket 05).
+tenant_service: TenantService | None = None
 fetch_service = FetchService()
 
 
@@ -48,6 +97,43 @@ def _tenant_summary(tenant: dict) -> str:
     return f"{tenant['id']}: {tenant['tenant_name']} ({tenant['url']})"
 
 
+def _resolve_tenant_service() -> TenantService | None:
+    """
+    Returns the module-level TenantService, resolving it from the CLI's
+    active settings pointer the first time a command needs one. Returns None
+    (after printing an error naming settings set/init) if no pointer is
+    configured yet - callers must check for None and exit 1 rather than
+    falling back to any bundled default.
+    """
+    global tenant_service
+    if tenant_service is not None:
+        return tenant_service
+
+    active_path: Path | None = CliConfig().get_active_settings_path()
+    if active_path is None:
+        _print_error(_NO_SETTINGS_MESSAGE)
+        return None
+
+    tenant_service = TenantService(active_path)
+    return tenant_service
+
+
+def _next_backup_path(path: Path) -> Path:
+    """
+    Finds a not-yet-taken backup filename for path: <path-without-extension>.backup.json,
+    then .backup-2.json, .backup-3.json, ... - never overwrites a previous backup.
+    """
+    stem_path: Path = path.with_suffix("")
+    candidate: Path = stem_path.with_name(f"{stem_path.name}.backup.json")
+
+    suffix = 2
+    while candidate.exists():
+        candidate = stem_path.with_name(f"{stem_path.name}.backup-{suffix}.json")
+        suffix += 1
+
+    return candidate
+
+
 @app.command(name="list")
 def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False) -> int:
     """Lists all configured tenants.
@@ -57,7 +143,11 @@ def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json
     json_output: bool
         Print the full tenant objects as JSON instead of a human-readable summary.
     """
-    tenants: list[dict] = tenant_service.get_all_tenants()
+    service: TenantService | None = _resolve_tenant_service()
+    if service is None:
+        return 1
+
+    tenants: list[dict] = service.get_all_tenants()
 
     if json_output:
         print(json.dumps(tenants, indent=4))
@@ -78,8 +168,12 @@ def show_tenant(tenant_id: int) -> int:
         The tenant's numeric ID, e.g. crmfetch show 3. Run crmfetch list
         to see available IDs.
     """
+    service: TenantService | None = _resolve_tenant_service()
+    if service is None:
+        return 1
+
     try:
-        tenant: dict = tenant_service.get_tenant_by_id(tenant_id)
+        tenant: dict = service.get_tenant_by_id(tenant_id)
     except ValueError as e:
         _print_error(str(e))
         return 1
@@ -98,8 +192,12 @@ def fetch_tenant(tenant_id: int) -> int:
         The tenant's numeric ID, e.g. crmfetch fetch 3. Run crmfetch list
         to see available IDs.
     """
+    service: TenantService | None = _resolve_tenant_service()
+    if service is None:
+        return 1
+
     try:
-        tenant: dict = tenant_service.get_tenant_by_id(tenant_id)
+        tenant: dict = service.get_tenant_by_id(tenant_id)
     except ValueError as e:
         _print_error(str(e))
         return 1
@@ -145,6 +243,10 @@ def add_tenant(
     local_dir: str
         Local directory CRMScripts are fetched into.
     """
+    service: TenantService | None = _resolve_tenant_service()
+    if service is None:
+        return 1
+
     new_tenant: dict = {
         "tenant_name": name,
         "url": url,
@@ -154,14 +256,14 @@ def add_tenant(
     }
 
     try:
-        added: dict = tenant_service.add_tenant(new_tenant)
+        added: dict = service.add_tenant(new_tenant)
     except Exception as e:
         _print_error(str(e))
         return 1
 
     # Backfills default fetch_options onto the tenant we just added, same as
     # today's add_missing_fetch_options quirk for legacy tenants.
-    tenant_service.add_missing_fetch_options(tenant_service.get_all_tenants())
+    service.add_missing_fetch_options(service.get_all_tenants())
 
     print(f"Added tenant {added['id']}: {added['tenant_name']}")
     return 0
@@ -196,8 +298,12 @@ def edit_tenant(
     local_dir: str | None
         New local directory CRMScripts are fetched into.
     """
+    service: TenantService | None = _resolve_tenant_service()
+    if service is None:
+        return 1
+
     try:
-        tenant: dict = tenant_service.get_tenant_by_id(tenant_id)
+        tenant: dict = service.get_tenant_by_id(tenant_id)
     except ValueError as e:
         _print_error(str(e))
         return 1
@@ -214,7 +320,7 @@ def edit_tenant(
         tenant["local_directory"] = local_dir
 
     try:
-        tenant_service.update_tenant(tenant)
+        service.update_tenant(tenant)
     except ValueError as e:
         _print_error(str(e))
         return 1
@@ -239,8 +345,12 @@ def delete_tenant(tenant_id: int, *, yes: bool = False) -> int:
     yes: bool
         Confirms the deletion. Omitting it is a safe no-op.
     """
+    service: TenantService | None = _resolve_tenant_service()
+    if service is None:
+        return 1
+
     try:
-        tenant: dict = tenant_service.get_tenant_by_id(tenant_id)
+        tenant: dict = service.get_tenant_by_id(tenant_id)
     except ValueError as e:
         _print_error(str(e))
         return 1
@@ -250,8 +360,98 @@ def delete_tenant(tenant_id: int, *, yes: bool = False) -> int:
         print("Pass --yes to actually delete it.")
         return 1
 
-    tenant_service.delete_tenant(tenant_id)
+    service.delete_tenant(tenant_id)
     print(f"Deleted tenant {tenant_id}.")
+    return 0
+
+
+settings_app = cyclopts.App(
+    name="settings",
+    help="Manage which tenant_settings.json file this CLI reads and writes.",
+)
+app.command(settings_app)
+
+
+@settings_app.command(name="set")
+def settings_set(path: str) -> int:
+    """Points the CLI at an existing tenant_settings.json file.
+
+    Validates that the path exists and parses as a JSON list, then stores it
+    as the active pointer. Does not copy or modify the file's contents - the
+    CLI reads/writes that literal path directly from now on.
+
+    Parameters
+    ----------
+    path: str
+        Path to an existing tenant_settings.json file.
+    """
+    settings_path: Path = Path(path)
+
+    if not settings_path.is_file():
+        _print_error(f"No file found at {settings_path}.")
+        return 1
+
+    try:
+        with open(settings_path) as f:
+            parsed = json.load(f)
+    except json.JSONDecodeError as e:
+        _print_error(f"{settings_path} is not valid JSON: {e}")
+        return 1
+
+    if not isinstance(parsed, list):
+        _print_error(f"{settings_path} doesn't look like a tenant_settings.json file - expected a JSON list.")
+        return 1
+
+    resolved_path: Path = settings_path.resolve()
+    CliConfig().set_active_settings_path(resolved_path)
+    print(f"Active settings file set to {resolved_path}.")
+    return 0
+
+
+@settings_app.command(name="init")
+def settings_init(path: str) -> int:
+    """Creates a fresh default tenant_settings.json at path and sets it active.
+
+    If something already exists at path, it's backed up first (renamed to
+    <path-without-extension>.backup.json, or .backup-2.json etc. if that name
+    is taken) rather than overwritten silently.
+
+    Parameters
+    ----------
+    path: str
+        Where to create the fresh default settings file.
+    """
+    settings_path: Path = Path(path).resolve()
+
+    if settings_path.exists():
+        backup_path: Path = _next_backup_path(settings_path)
+        settings_path.rename(backup_path)
+        print(f"Backed up existing file to {backup_path}.")
+
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(settings_path, "w") as f:
+        json.dump(DEFAULT_TENANT_SETTINGS, f, indent=4)
+    print(f"Created fresh default settings file at {settings_path}.")
+
+    CliConfig().set_active_settings_path(settings_path)
+    print(f"Active settings file set to {settings_path}.")
+    return 0
+
+
+@settings_app.command(name="path")
+def settings_path_command() -> int:
+    """Prints the currently active tenant_settings.json path.
+
+    Prints a clear "not configured yet" message (not an error) if no pointer
+    has been set via settings set/init yet.
+    """
+    active_path: Path | None = CliConfig().get_active_settings_path()
+
+    if active_path is None:
+        print("No active settings file configured yet. Run 'crmfetch settings set <path>' or 'crmfetch settings init <path>' first.")
+        return 0
+
+    print(active_path)
     return 0
 
 

@@ -10,6 +10,7 @@ readme = "readme.md"
 requires-python = ">=3.10"
 dependencies = [
     "cyclopts~=4.22",
+    "platformdirs~=4.3",
     "requests~=2.27.1",
     "tenacity~=8.1.0",
     "toml~=0.10.2",
@@ -26,6 +27,7 @@ crmfetch = "cli:main"
 [tool.poetry]
 packages = [
     { include = "cli.py" },
+    { include = "cli_config.py" },
     { include = "fetch_service.py" },
     { include = "tenant_service.py" },
     { include = "utility.py" },
