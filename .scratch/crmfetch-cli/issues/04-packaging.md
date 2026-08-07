@@ -5,6 +5,8 @@ Blocked by: 02, 03
 
 Spec: `.scratch/crmfetch-cli/spec.md`
 
+**Before writing any code, load the `coding-style` skill and follow it for everything in this ticket.**
+
 ## Description
 
 Update the PyInstaller build configuration (`CRMScript Fetcher.spec` and/or the `python -m eel`-style build command in `readme.md`) so that:
@@ -21,3 +23,4 @@ Update `readme.md`'s build instructions to reflect both new build commands/targe
 - [ ] `readme.md` build instructions updated for both platforms, matching the actual commands used
 - [ ] `pyproject.toml` version bump convention (see prior `2.1.0` bump in git history) still works unchanged — `get_current_version()` still reads from the same place
 - [ ] `uv tool install` path from ticket 02 still works after any `pyproject.toml` packaging changes made in this ticket
+- [ ] Code follows the `coding-style` skill

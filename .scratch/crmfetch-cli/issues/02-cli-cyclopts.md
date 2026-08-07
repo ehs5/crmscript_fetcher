@@ -5,6 +5,8 @@ Blocked by: 01
 
 Spec: `.scratch/crmfetch-cli/spec.md`
 
+**Before writing any code, load the `coding-style` skill and follow it for everything in this ticket.**
+
 ## Description
 
 Build a flag-based CLI ("crmfetch") using Cyclopts, calling the core extracted in ticket 01 directly and in-process (no subprocess relationship). No wizard/interactive mode. No `fetch --all` and no implicit "fetch everything" behavior — `fetch` always requires an explicit id.
@@ -33,3 +35,4 @@ Add a `[project.scripts]` entry point in `pyproject.toml` pointing at the CLI's 
 - [ ] Exit codes verified for at least one success case, one runtime-failure case (e.g. `fetch` on a nonexistent id), and one usage-error case (e.g. missing required flag on `add`)
 - [ ] `[project.scripts]` entry added; `uv tool install .` (or equivalent local install) from the repo root produces a working `crmfetch` command
 - [ ] Tests added invoking the Cyclopts app object directly (in-process, not via subprocess) confirming each command's flags map onto the correct core call with the correct arguments
+- [ ] Code follows the `coding-style` skill

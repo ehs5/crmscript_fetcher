@@ -5,6 +5,8 @@ Blocked by: 01
 
 Spec: `.scratch/crmfetch-cli/spec.md`
 
+**Before writing any code, load the `coding-style` skill and follow it for everything in this ticket.**
+
 ## Description
 
 Eel is discontinued. Replace it with pywebview, calling the core extracted in ticket 01 directly and in-process. The Vue frontend itself (`vue/src/`) should stay largely as-is — only the JS↔Python bridge layer changes shape.
@@ -24,3 +26,4 @@ Concretely:
 - [ ] `python main.py` launches a pywebview window (not a browser tab) displaying the existing Vue UI
 - [ ] Fetch error/info display still reads correctly in the GUI after ticket 01's HTML→plain-text change (verify visually, not just that it doesn't crash)
 - [ ] Manual smoke test performed and reported: launch the app, exercise list/add/edit/delete/fetch/get-directory/open-directory/version once each (per the spec's Testing Decisions, no automated GUI test coverage is expected — this is deliberately a manual pass)
+- [ ] Code follows the `coding-style` skill
