@@ -53,10 +53,14 @@ BANNER = (
 
 
 def _print_splash() -> int:
-    """Runs when `crmfetch` is invoked with no arguments at all - a short
-    logo + pointer to --help, not the full first-run guidance BANNER carries.
-    """
-    print(f"{_LOGO}\n\n{_VERSION_LINE}\n\nRun 'crmfetch --help' to get started.")
+    # Runs when `crmfetch` is invoked with no arguments at all. Reuses the
+    # exact same Commands-panel render --help shows (via help_print), just
+    # with the short banner (no first-run guidance) and no Options panel -
+    # those live in --help specifically. No docstring here on purpose:
+    # cyclopts would otherwise render it as the app's own description text.
+    app.help_prologue = f"{_LOGO}\n\n{_VERSION_LINE}"
+    app["--version"].show = False
+    app.help_print([])
     return 0
 
 
@@ -85,11 +89,10 @@ app = cyclopts.App(
 _options_group = cyclopts.Group("Options")
 app["--help"].group = _options_group
 app["--version"].group = _options_group
-# Neither needs to be listed: --help is self-evident (you're reading this
-# listing), and --version is redundant now that the banner shows the version
-# number under the logo. Both stay fully functional, just not advertised.
+# --help doesn't need to be listed - if you're reading this listing, you've
+# already found it. --version stays listed here (shown on --help only,
+# hidden again on the bare splash above).
 app["--help"].show = False
-app["--version"].show = False
 
 # Left unset at import time - built lazily by _resolve_tenant_service() from
 # the CLI's own settings pointer (cli_config.py) the first time a command
