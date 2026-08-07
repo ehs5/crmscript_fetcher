@@ -15,6 +15,13 @@ from pathlib import Path
 import pytest
 
 import cli
+from utility import get_app_directory
+
+
+def shipped_default_tenants() -> list[dict]:
+    """Reads the actual shipped tenant_settings.json template - the same file `settings init` copies from."""
+    template_path: Path = get_app_directory() / "tenant_settings.json"
+    return json.loads(template_path.read_text())
 
 
 @pytest.fixture(autouse=True)
@@ -127,7 +134,7 @@ def test_settings_init_creates_default_tenant_and_sets_it_active(
 
     assert exit_code == 0
     on_disk: list[dict] = json.loads(settings_path.read_text())
-    assert on_disk == cli.DEFAULT_TENANT_SETTINGS
+    assert on_disk == shipped_default_tenants()
 
     path_exit_code: int = run(["settings", "path"])
     assert path_exit_code == 0
@@ -143,7 +150,7 @@ def test_settings_init_backs_up_pre_existing_file_instead_of_overwriting(tmp_pat
     assert exit_code == 0
     backup_path: Path = tmp_path / "tenant_settings.backup.json"
     assert json.loads(backup_path.read_text())[0]["tenant_name"] == "Old data"
-    assert json.loads(settings_path.read_text()) == cli.DEFAULT_TENANT_SETTINGS
+    assert json.loads(settings_path.read_text()) == shipped_default_tenants()
 
 
 def test_settings_init_does_not_overwrite_an_existing_backup(tmp_path: Path) -> None:

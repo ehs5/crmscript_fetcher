@@ -6,6 +6,7 @@ there is no subprocess relationship with the GUI. See .scratch/crmfetch-cli/spec
 for the full command surface and the decisions behind it.
 """
 import json
+import shutil
 import sys
 from pathlib import Path
 from typing import Annotated
@@ -15,28 +16,7 @@ import cyclopts
 from cli_config import CliConfig
 from fetch_service import FetchService
 from tenant_service import TenantService
-from utility import get_current_version
-
-# Matches tenant_settings.json's shipped template exactly - `settings init`
-# writes this same content to a fresh file the CLI is pointed at.
-DEFAULT_TENANT_SETTINGS: list[dict] = [
-    {
-        "id": 1,
-        "include_id": "crmscript_fetcher",
-        "key": "yourUniqueKeyHere",
-        "local_directory": "C:/My directory",
-        "tenant_name": "Example tenant",
-        "url": "https://online.superoffice.com/CustXXXXX/CS",
-        "fetch_options": {
-            "fetch_scripts": True,
-            "fetch_triggers": True,
-            "fetch_screens": True,
-            "fetch_screen_choosers": True,
-            "fetch_scheduled_tasks": True,
-            "fetch_extra_tables": True,
-        },
-    }
-]
+from utility import get_app_directory, get_current_version
 
 _NO_SETTINGS_MESSAGE = (
     "No active tenant_settings.json is configured. "
@@ -438,9 +418,12 @@ def settings_init(path: str) -> int:
         settings_path.rename(backup_path)
         print(f"Backed up existing file to {backup_path}.")
 
+    # The shipped tenant_settings.json template *is* the default - copying
+    # it directly means there's only one place that shape is ever defined,
+    # instead of a second copy here that could drift out of sync with it.
+    template_path: Path = get_app_directory() / "tenant_settings.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(settings_path, "w") as f:
-        json.dump(DEFAULT_TENANT_SETTINGS, f, indent=4)
+    shutil.copy(template_path, settings_path)
     print(f"Created fresh default settings file at {settings_path}.")
 
     CliConfig().set_active_settings_path(settings_path)
