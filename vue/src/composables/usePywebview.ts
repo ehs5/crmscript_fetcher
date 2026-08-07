@@ -24,7 +24,7 @@ export interface PywebviewApi {
 }
 
 // pywebview injects window.pywebview (and populates .api) once the native
-// window has finished loading the page - see the pywebviveready wait in main.ts.
+// window has finished loading the page - see the pywebviewready wait in main.ts.
 declare global {
   interface Window {
     pywebview: {
