@@ -237,9 +237,9 @@ def add_tenant(
 ) -> int:
     """Creates a new tenant.
 
-    Fetch options aren't exposed here - new tenants get the same defaults
-    TenantService.add_missing_fetch_options backfills onto legacy tenants
-    (all six options enabled).
+    Fetch options aren't set here - the new tenant starts with all of them
+    enabled. Edit fetch options via the GUI, or directly in the settings
+    file, if you need different ones.
 
     Parameters
     ----------
@@ -345,9 +345,8 @@ def delete_tenant(tenant_id: int, *, yes: bool = False) -> int:
     """Deletes a tenant by id.
 
     Refuses without confirmation: pass --yes to actually delete. Without it,
-    prints the tenant that would be deleted and exits non-zero, leaving
-    tenant_settings.json untouched - there is no interactive [y/N] prompt,
-    since that would block on stdin and break agent/CI use.
+    prints the tenant that would be deleted and exits without changing
+    anything - a safe way to double-check before you commit to it.
 
     Parameters
     ----------
