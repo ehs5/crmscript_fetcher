@@ -56,14 +56,11 @@ def _print_splash() -> int:
     # Runs when `crmfetch` is invoked with no arguments at all. Reuses the
     # exact same Commands+Options panel render --help shows (via help_print),
     # just with the short banner (no first-run guidance) - that lives in
-    # --help specifically. The epilogue below is the one thing every
-    # first-time caller (human or agent) needs pointed out explicitly: where
-    # to go next. No docstring here on purpose: cyclopts would otherwise
-    # render it as the app's own description text.
-    app.help_prologue = f"{_LOGO}\n\n{_VERSION_LINE}"
-    app.help_epilogue = (
-        "Start here: run 'crmfetch --help'.\n"
-        "Run a command with --help for its details, e.g. 'crmfetch add --help'."
+    # --help specifically. No docstring here on purpose: cyclopts would
+    # otherwise render it as the app's own description text.
+    app.help_prologue = (
+        f"{_LOGO}\n\n{_VERSION_LINE}\n\n"
+        "  Run a command with --help for its details, e.g. 'crmfetch add --help'."
     )
     # Version's already right there in the banner above - no need to also
     # list --version as an option on the splash specifically.
