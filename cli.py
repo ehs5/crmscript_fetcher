@@ -56,7 +56,7 @@ _LOGO = """
 # get_current_version() is called once here, at CLI startup - each `crmfetch`
 # invocation is a fresh process, so this always reflects the installed
 # pyproject.toml, same as --version does.
-BANNER = f"{_LOGO}\n\nv{get_current_version()} - https://github.com/ehs5/crmscript_fetcher"
+BANNER = f"{_LOGO}\n\n v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher"
 
 app = cyclopts.App(
     name="crmfetch",
