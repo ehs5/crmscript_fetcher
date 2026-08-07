@@ -259,6 +259,39 @@ def test_version_matches_pyproject_toml(capsys: pytest.CaptureFixture) -> None:
     assert capsys.readouterr().out.strip() == utility.get_current_version()
 
 
+def test_version_shorthand_flag_matches_long_flag(capsys: pytest.CaptureFixture) -> None:
+    exit_code: int = run(["-v"])
+
+    assert exit_code == 0
+    assert capsys.readouterr().out.strip() == utility.get_current_version()
+
+
+def test_show_prints_full_tenant_as_json(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
+    tenant: dict = {
+        "id": 5,
+        "tenant_name": "Acme",
+        "url": "https://acme.example",
+        "include_id": "acme-inc",
+        "key": "secret",
+        "local_directory": "/tmp/acme",
+    }
+    tenant_service.get_tenant_by_id.return_value = tenant
+
+    exit_code: int = run(["show", "5"])
+
+    assert exit_code == 0
+    tenant_service.get_tenant_by_id.assert_called_once_with(5)
+    assert json.loads(capsys.readouterr().out) == tenant
+
+
+def test_show_unknown_id_exits_one(tenant_service: Mock) -> None:
+    tenant_service.get_tenant_by_id.side_effect = ValueError("Tenant ID not found in tenant list")
+
+    exit_code: int = run(["show", "999"])
+
+    assert exit_code == 1
+
+
 def test_main_remaps_bare_apps_usage_error_exit_code_to_two(tenant_service: Mock) -> None:
     # cli.app on its own exits 1 on a parse error (Cyclopts' own default in
     # this library version). cli.main - the actual console script entry

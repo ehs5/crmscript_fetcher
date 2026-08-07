@@ -15,7 +15,24 @@ from fetch_service import FetchService
 from tenant_service import TenantService
 from utility import get_current_version
 
-app = cyclopts.App(name="crmfetch", version=get_current_version)
+BANNER = """
+                       __     _       _
+                      / _|   | |     | |
+   ___ _ __ _ __ ___ | |_ ___| |_ ___| |__
+  / __| '__| '_ ` _ \\|  _/ _ \\ __/ __| '_ \\
+ | (__| |  | | | | | | ||  __/ || (__| | | |
+  \\___|_|  |_| |_| |_|_| \\___|\\__\\___|_| |_|
+""".strip("\n")
+
+app = cyclopts.App(
+    name="crmfetch",
+    version=get_current_version,
+    version_flags=["--version", "-v"],
+    help_prologue=BANNER,
+    # Without this, cyclopts renders help_prologue as Markdown, which
+    # collapses the banner's line breaks into one line.
+    help_format="plaintext",
+)
 
 tenant_service = TenantService()
 fetch_service = FetchService()
@@ -51,14 +68,35 @@ def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json
     return 0
 
 
-@app.command(name="fetch")
-def fetch_tenant(tenant_id: int) -> int:
-    """Fetches CRMScripts for one tenant by id.
+@app.command(name="show")
+def show_tenant(tenant_id: int) -> int:
+    """Prints the full JSON for one tenant.
 
     Parameters
     ----------
     tenant_id: int
-        The numeric id of the tenant to fetch, as shown by `crmfetch list`.
+        The tenant's numeric ID, e.g. crmfetch show 3. Run crmfetch list
+        to see available IDs.
+    """
+    try:
+        tenant: dict = tenant_service.get_tenant_by_id(tenant_id)
+    except ValueError as e:
+        _print_error(str(e))
+        return 1
+
+    print(json.dumps(tenant, indent=4))
+    return 0
+
+
+@app.command(name="fetch")
+def fetch_tenant(tenant_id: int) -> int:
+    """Fetches from the given tenant ID.
+
+    Parameters
+    ----------
+    tenant_id: int
+        The tenant's numeric ID, e.g. crmfetch fetch 3. Run crmfetch list
+        to see available IDs.
     """
     try:
         tenant: dict = tenant_service.get_tenant_by_id(tenant_id)
@@ -88,10 +126,10 @@ def add_tenant(
     key: str,
     local_dir: Annotated[str, cyclopts.Parameter(name="--local-dir")],
 ) -> int:
-    """Creates a new tenant with the core fields.
+    """Creates a new tenant.
 
     Fetch options aren't exposed here - new tenants get the same defaults
-    `TenantService.add_missing_fetch_options` backfills onto legacy tenants
+    TenantService.add_missing_fetch_options backfills onto legacy tenants
     (all six options enabled).
 
     Parameters
@@ -139,7 +177,9 @@ def edit_tenant(
     key: str | None = None,
     local_dir: Annotated[str | None, cyclopts.Parameter(name="--local-dir")] = None,
 ) -> int:
-    """Updates a tenant's core fields, leaving unspecified fields unchanged.
+    """Updates a tenant.
+
+    Leaves unspecified fields unchanged.
 
     Parameters
     ----------
