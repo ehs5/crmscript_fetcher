@@ -39,6 +39,10 @@ _LOGO = """
 BANNER = (
     f"{_LOGO}\n\n"
     f"  v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher\n\n"
+    "First run? Point crmfetch at a tenant_settings.json file before anything else:\n"
+    "  - If the CRMScript Fetcher GUI is already installed, find its\n"
+    "    tenant_settings.json and run: crmfetch settings set <path>\n"
+    "  - Otherwise, create a fresh one: crmfetch settings init <path>\n\n"
     "Run a command with --help for its details, e.g. 'crmfetch add --help'."
 )
 
