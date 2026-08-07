@@ -62,6 +62,9 @@ def _print_splash() -> int:
     # render it as the app's own description text.
     app.help_prologue = f"{_LOGO}\n\n{_VERSION_LINE}"
     app.help_epilogue = "Start here: run 'crmfetch --help'."
+    # Version's already right there in the banner above - no need to also
+    # list --version as an option on the splash specifically.
+    app["--version"].show = False
     app.help_print([])
     return 0
 
