@@ -28,13 +28,17 @@ Add a `[project.scripts]` entry point in `pyproject.toml` pointing at the CLI's 
 
 ## Acceptance Criteria
 
-- [ ] All six commands above implemented and calling core functions from ticket 01 directly (no duplicated business logic)
-- [ ] `crmfetch fetch` with no id, and `crmfetch fetch --all`, both error as usage errors (exit code 2) rather than doing anything — confirms the "no implicit fetch-all" decision is enforced, not just undocumented
-- [ ] `crmfetch delete <id>` without `--yes` prints the tenant it would delete and exits non-zero without modifying `tenant_settings.json`
-- [ ] `crmfetch delete <id> --yes` actually deletes and exits 0
-- [ ] `crmfetch list --json` output is valid JSON parseable by `json.loads`, containing the full tenant list
-- [ ] `crmfetch --version` output matches `pyproject.toml`'s `[project] version`
-- [ ] Exit codes verified for at least one success case, one runtime-failure case (e.g. `fetch` on a nonexistent id), and one usage-error case (e.g. missing required flag on `add`)
-- [ ] `[project.scripts]` entry added; `uv tool install .` (or equivalent local install) from the repo root produces a working `crmfetch` command
-- [ ] Tests added invoking the Cyclopts app object directly (in-process, not via subprocess) confirming each command's flags map onto the correct core call with the correct arguments
-- [ ] Code follows the `coding-style` skill
+- [x] All six commands above implemented and calling core functions from ticket 01 directly (no duplicated business logic)
+- [x] `crmfetch fetch` with no id, and `crmfetch fetch --all`, both error as usage errors (exit code 2) rather than doing anything — confirms the "no implicit fetch-all" decision is enforced, not just undocumented
+- [x] `crmfetch delete <id>` without `--yes` prints the tenant it would delete and exits non-zero without modifying `tenant_settings.json`
+- [x] `crmfetch delete <id> --yes` actually deletes and exits 0
+- [x] `crmfetch list --json` output is valid JSON parseable by `json.loads`, containing the full tenant list
+- [x] `crmfetch --version` output matches `pyproject.toml`'s `[project] version`
+- [x] Exit codes verified for at least one success case, one runtime-failure case (e.g. `fetch` on a nonexistent id), and one usage-error case (e.g. missing required flag on `add`)
+- [x] `[project.scripts]` entry added; `uv tool install .` (or equivalent local install) from the repo root produces a working `crmfetch` command
+- [x] Tests added invoking the Cyclopts app object directly (in-process, not via subprocess) confirming each command's flags map onto the correct core call with the correct arguments
+- [x] Code follows the `coding-style` skill
+
+## Comments
+
+- code-review confirmed this ticket is clean (2026-08-07). Status left as-is; closing is a human decision.
