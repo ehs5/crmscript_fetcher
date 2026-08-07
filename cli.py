@@ -36,15 +36,29 @@ _LOGO = """
 # get_current_version() is called once here, at CLI startup - each `crmfetch`
 # invocation is a fresh process, so this always reflects the installed
 # pyproject.toml, same as --version does.
+_VERSION_LINE = f"  v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher"
+
+# Shown on `crmfetch --help` (and any subcommand's --help) - the fuller
+# first-run guidance belongs here, not on the bare-invocation splash below,
+# so that just running `crmfetch` with no arguments stays short.
 BANNER = (
     f"{_LOGO}\n\n"
-    f"  v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher\n\n"
+    f"{_VERSION_LINE}\n\n"
     "First run? Point crmfetch at a tenant_settings.json file before anything else:\n"
     "  - If the CRMScript Fetcher GUI is already installed, find its\n"
     "    tenant_settings.json and run: crmfetch settings set <path>\n"
     "  - Otherwise, create a fresh one: crmfetch settings init <path>\n\n"
     "Run a command with --help for its details, e.g. 'crmfetch add --help'."
 )
+
+
+def _print_splash() -> int:
+    """Runs when `crmfetch` is invoked with no arguments at all - a short
+    logo + pointer to --help, not the full first-run guidance BANNER carries.
+    """
+    print(f"{_LOGO}\n\n{_VERSION_LINE}\n\nRun 'crmfetch --help' to get started.")
+    return 0
+
 
 app = cyclopts.App(
     name="crmfetch",
@@ -59,6 +73,10 @@ app = cyclopts.App(
     # Subcommands (e.g. `crmfetch fetch --help`) keep their own usage line,
     # since those actually show argument syntax.
     usage="",
+    # Without this, bare `crmfetch` (no arguments) falls back to the same
+    # full help page as `crmfetch --help` - default_command overrides that
+    # specific case only; --help/-h still trigger the real help page.
+    default_command=_print_splash,
 )
 
 # --help/--version are cyclopts' own auto-registered commands, with no group
