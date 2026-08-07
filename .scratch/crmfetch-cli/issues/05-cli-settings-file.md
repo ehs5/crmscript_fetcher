@@ -33,17 +33,17 @@ The pointer itself (which path is active) is small persistent CLI-owned config �
 
 ## Acceptance Criteria
 
-- [ ] `platformdirs` added as a direct dependency in `pyproject.toml` (not relied on transitively)
-- [ ] `TenantService` accepts an optional explicit settings-file path; its no-argument behavior (used by the GUI, untouched) still resolves via `get_app_directory()` exactly as before
-- [ ] `crmfetch settings set <path>` stores the path as the active pointer after validating it exists and parses as a JSON list; does not modify or copy the file's contents
-- [ ] `crmfetch settings init <path>` creates a fresh default file (one "Example tenant" entry matching the shipped template) at `<path>` and sets it active, in one step
-- [ ] `crmfetch settings init <path>` backs up a pre-existing file at `<path>` to `<path>.backup.json` (or `-2.json`, `-3.json`, ... if that name is taken) before writing the fresh default, and prints exactly what it did
-- [ ] `crmfetch settings path` prints the active path, or a clear "not configured yet" message (not an error) if none is set
-- [ ] `list`/`fetch`/`add`/`edit`/`delete`/`show` all exit 1 with a message pointing at `settings set`/`settings init` when no pointer is configured yet — verified for at least one of them
-- [ ] Once a pointer is set, all six commands operate on that literal path (verified by pointing at a tmp file, running a command, and confirming the tmp file - not any bundled default - was read/written)
-- [ ] No change in behavior for `TenantService()` called with no arguments (the GUI's path) - existing GUI-side tests, if any, and manual reasoning both confirm this
-- [ ] Tests use `tmp_path`/monkeypatched config-dir resolution throughout - no test reads or writes the developer's real `~/.config` (or platform equivalent) or real `tenant_settings.json`
-- [ ] Code follows the `coding-style` skill
+- [x] `platformdirs` added as a direct dependency in `pyproject.toml` (not relied on transitively)
+- [x] `TenantService` accepts an optional explicit settings-file path; its no-argument behavior (used by the GUI, untouched) still resolves via `get_app_directory()` exactly as before
+- [x] `crmfetch settings set <path>` stores the path as the active pointer after validating it exists and parses as a JSON list; does not modify or copy the file's contents
+- [x] `crmfetch settings init <path>` creates a fresh default file (one "Example tenant" entry matching the shipped template) at `<path>` and sets it active, in one step
+- [x] `crmfetch settings init <path>` backs up a pre-existing file at `<path>` to `<path>.backup.json` (or `-2.json`, `-3.json`, ... if that name is taken) before writing the fresh default, and prints exactly what it did
+- [x] `crmfetch settings path` prints the active path, or a clear "not configured yet" message (not an error) if none is set
+- [x] `list`/`fetch`/`add`/`edit`/`delete`/`show` all exit 1 with a message pointing at `settings set`/`settings init` when no pointer is configured yet — verified for at least one of them
+- [x] Once a pointer is set, all six commands operate on that literal path (verified by pointing at a tmp file, running a command, and confirming the tmp file - not any bundled default - was read/written)
+- [x] No change in behavior for `TenantService()` called with no arguments (the GUI's path) - existing GUI-side tests, if any, and manual reasoning both confirm this
+- [x] Tests use `tmp_path`/monkeypatched config-dir resolution throughout - no test reads or writes the developer's real `~/.config` (or platform equivalent) or real `tenant_settings.json`
+- [x] Code follows the `coding-style` skill
 
 ## Comments
 
