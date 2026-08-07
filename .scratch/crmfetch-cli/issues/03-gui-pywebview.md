@@ -23,9 +23,9 @@ Concretely:
 
 ## Acceptance Criteria
 
-- [ ] All 9 operations listed above work identically from the Vue GUI (list tenants, add, edit, delete, fetch, get fetcher script, pick a directory, open a directory, show version)
-- [ ] No `import eel` remains anywhere in the codebase
-- [ ] `python main.py` launches a pywebview window (not a browser tab) displaying the existing Vue UI
-- [ ] Fetch error/info display still reads correctly in the GUI after ticket 01's HTML→plain-text change (verify visually, not just that it doesn't crash)
+- [x] All 9 operations listed above work identically from the Vue GUI (list tenants, add, edit, delete, fetch, get fetcher script, pick a directory, open a directory, show version)
+- [x] No `import eel` remains anywhere in the codebase
+- [x] `python main.py` launches a pywebview window (not a browser tab) displaying the existing Vue UI
+- [x] Fetch error/info display still reads correctly in the GUI after ticket 01's HTML→plain-text change (verify visually, not just that it doesn't crash)
 - [ ] Manual smoke test performed and reported: launch the app, exercise list/add/edit/delete/fetch/get-directory/open-directory/version once each (per the spec's Testing Decisions, no automated GUI test coverage is expected — this is deliberately a manual pass)
-- [ ] Code follows the `coding-style` skill
+- [x] Code follows the `coding-style` skill
