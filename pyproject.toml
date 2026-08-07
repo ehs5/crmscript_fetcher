@@ -9,8 +9,36 @@ license = {text = "MIT license"}
 readme = "readme.md"
 requires-python = ">=3.10"
 dependencies = [
+    "cyclopts~=4.22",
+    "requests~=2.27.1",
+    "tenacity~=8.1.0",
+    "toml~=0.10.2",
 ]
 
+[project.scripts]
+crmfetch = "cli:main"
+
+# The core + CLI live as flat top-level modules (not a package), matching
+# how this repo has always been laid out. poetry-core can't autodetect that
+# layout, so list exactly the modules crmfetch's import graph needs; the Eel
+# GUI's own entry points (main.py, bridge.py) aren't part of it and are left
+# out of the CLI-only install on purpose.
+[tool.poetry]
+packages = [
+    { include = "cli.py" },
+    { include = "fetch_service.py" },
+    { include = "tenant_service.py" },
+    { include = "utility.py" },
+    { include = "data_creator.py" },
+    { include = "data_creation" },
+]
+include = [
+    # get_current_version()/TenantService both resolve paths relative to
+    # utility.py's own directory, so these two must ship alongside it.
+    # Plain string includes default to sdist-only - force wheel too.
+    { path = "pyproject.toml", format = ["sdist", "wheel"] },
+    { path = "tenant_settings.json", format = ["sdist", "wheel"] },
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

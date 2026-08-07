@@ -16,5 +16,6 @@ typing_extensions==4.13.2
 zope.event==5.0
 zope.interface==7.2
 
+cyclopts~=4.22
 requests~=2.27.1
 toml~=0.10.2
