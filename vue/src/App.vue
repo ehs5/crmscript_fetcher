@@ -227,7 +227,7 @@ import {
   Delete,
 } from "@element-plus/icons-vue"
 import { ElLoading, ElMessage, ElMessageBox, ElTable } from "element-plus"
-import { useEel } from "@/composables/useEel"
+import { usePywebview } from "@/composables/usePywebview"
 import type { LoadingInstance } from "element-plus/es/components/loading/src/loading.mjs"
 import type { FetchResult } from "./types/FetchResult"
 
@@ -241,8 +241,8 @@ const awaitingFolderInput: Ref<boolean> = ref(false)
 const fetchOptionsDialogVisible: Ref<boolean> = ref(false)
 const tenantTableRef = ref<InstanceType<typeof ElTable> | null>(null)
 
-// useEel let's us call the Python methods
-const eel = useEel()
+// usePywebview let's us call the Python methods
+const api = usePywebview()
 
 // Computed properties
 /**
@@ -315,7 +315,7 @@ function nlToBr(text: string): string {
 
 // Calls Python which loads tenant settings from JSON
 async function getTenantSettings(initialLoad: boolean = false): Promise<TenantSettings[]> {
-  return await eel.getAllTenants(initialLoad)
+  return await api.getAllTenants(initialLoad)
 }
 
 function handleRowClick(row: TenantSettings) {
@@ -357,7 +357,7 @@ function handleNewTenant() {
 
 /** Gets CRMScript Fetcher from file via Python and copies it to clipboard */
 async function handleCopyFetcherScript() {
-  const script: string = await eel.getFetcherScript()
+  const script: string = await api.getFetcherScript()
   navigator.clipboard.writeText(script)
   ElMessage.success("Fetcher script copied to clipboard")
 }
@@ -392,7 +392,7 @@ async function handleFetch() {
     })
 
     document.body.style.cursor = "wait"
-    const result: FetchResult = await eel.fetch(selectedTenant.value)
+    const result: FetchResult = await api.fetch(selectedTenant.value)
 
     // Reset cursor and close loading overlay
     document.body.style.cursor = "default"
@@ -491,10 +491,10 @@ async function handleSave() {
 
   if (tenantUnderEdit.value.id > 0) {
     // Updating existing tenant
-    await eel.updateTenant(tenantUnderEdit.value)
+    await api.updateTenant(tenantUnderEdit.value)
   } else {
     // Creating new tenant
-    tenantUnderEdit.value = await eel.addTenant(tenantUnderEdit.value)
+    tenantUnderEdit.value = await api.addTenant(tenantUnderEdit.value)
     allTenants.value.push(tenantUnderEdit.value)
     tenantTableRef.value?.setCurrentRow(tenantUnderEdit.value)
     ElMessage.success("Tenant created")
@@ -524,7 +524,7 @@ async function handleAskDirectory() {
   // Make Python ask user for the directory path
   ElMessage.info("Opening directory chooser...")
   awaitingFolderInput.value = true
-  const directoryPath: string = await eel.askDirectoryPath()
+  const directoryPath: string = await api.askDirectoryPath()
 
   // If user clicked cancel, directory path is returned as empty array for some reason?
   // This check makes sure user actually chose a path
@@ -540,7 +540,7 @@ async function handleOpenDirectory() {
   if (!selectedTenant.value) return
 
   document.body.style.cursor = "wait"
-  await eel.openDirectory(selectedTenant.value.local_directory)
+  await api.openDirectory(selectedTenant.value.local_directory)
   document.body.style.cursor = "default"
 }
 
@@ -551,7 +551,7 @@ function handleFetchOptions() {
 /** Fetch Options is not part of editing mode, so this uses "selectedTenant" instead of tenantUnderEdit */
 function handleSaveFetchOptions() {
   if (!selectedTenant.value) return
-  eel.updateTenant(selectedTenant.value)
+  api.updateTenant(selectedTenant.value)
   fetchOptionsDialogVisible.value = false
   ElMessage.success("Fetch options saved")
 }
@@ -571,7 +571,7 @@ async function handleDeleteTenant() {
     })
 
     // User confirmed
-    await eel.deleteTenant(selectedTenant.value.id)
+    await api.deleteTenant(selectedTenant.value.id)
 
     // Remove the tenant from the list
     const selectedTenantId: number = selectedTenant.value.id
@@ -593,7 +593,7 @@ onMounted(async () => {
   allTenants.value = await getTenantSettings(true)
 
   // Inject CRMScript Fetcher version into the page title
-  const currentVersion: string = await eel.getCurrentVersion()
+  const currentVersion: string = await api.getCurrentVersion()
   document.title = `CRMScript Fetcher v${currentVersion}`
 })
 </script>

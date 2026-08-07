@@ -98,19 +98,12 @@ All your tenant settings will be saved locally in the tenant_settings.json file.
 ## Quick Dev Guide
 
 ### Development
-There is code in main.ts that makes sure you can use **npm run dev** while the Eel server is running via
-your Python IDE.
+The GUI runs on pywebview, which talks to Python in-process rather than over Eel's old
+local HTTP server. There's no separate dev-server hybrid anymore - to see your changes:
 
-1. Run `main.py` in your Python IDE.
-This makes the Python backend run on `http://localhost:8686`.
-This will show you the frontend that already has been built, **not** the frontend that is currently in development.
-Keep this window open.
-
-2. In your Vue folder, start Vue:
-```bash
-npm run dev
-```
-App should now run on `http://localhost:5173` (usually).
+1. From the `vue` folder, run `npm run build`.
+2. Run `main.py` in your Python IDE (or `python main.py` from root). This opens the pywebview
+window against the freshly built `vue/dist`.
 
 ### How to Build
 1. From vue folder, run: `npm run build`
@@ -134,7 +127,7 @@ This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.app bund
 ## Built With
 
 - Python
-- Eel - a framework that lets frontend interact with Python code via a local web server
+- pywebview - a framework that lets frontend interact with Python code in-process
 - Vue.js
 - CRMScript (fetcher script)
 
