@@ -44,7 +44,7 @@ _NO_SETTINGS_MESSAGE = (
     "or 'crmfetch settings init <path>' to create a fresh one."
 )
 
-BANNER = """
+_LOGO = """
                        __     _       _
                       / _|   | |     | |
    ___ _ __ _ __ ___ | |_ ___| |_ ___| |__
@@ -52,6 +52,11 @@ BANNER = """
  | (__| |  | | | | | | ||  __/ || (__| | | |
   \\___|_|  |_| |_| |_|_| \\___|\\__\\___|_| |_|
 """.strip("\n")
+
+# get_current_version() is called once here, at CLI startup - each `crmfetch`
+# invocation is a fresh process, so this always reflects the installed
+# pyproject.toml, same as --version does.
+BANNER = f"{_LOGO}\n\nv{get_current_version()} - https://github.com/ehs5/crmscript_fetcher"
 
 app = cyclopts.App(
     name="crmfetch",
@@ -74,9 +79,11 @@ app = cyclopts.App(
 _options_group = cyclopts.Group("Options")
 app["--help"].group = _options_group
 app["--version"].group = _options_group
-# --help itself doesn't need to be listed - if you're reading this listing,
-# you've already found it.
+# Neither needs to be listed: --help is self-evident (you're reading this
+# listing), and --version is redundant now that the banner shows the version
+# number under the logo. Both stay fully functional, just not advertised.
 app["--help"].show = False
+app["--version"].show = False
 
 # Left unset at import time - built lazily by _resolve_tenant_service() from
 # the CLI's own settings pointer (cli_config.py) the first time a command
@@ -184,7 +191,7 @@ def show_tenant(tenant_id: int) -> int:
 
 @app.command(name="fetch")
 def fetch_tenant(tenant_id: int) -> int:
-    """Fetches from the given tenant ID.
+    """Fetches from the given tenant ID into its specified directory.
 
     Parameters
     ----------
@@ -453,6 +460,13 @@ def settings_path_command() -> int:
 
     print(active_path)
     return 0
+
+
+# Cyclopts sorts commands alphabetically by default; this pins an explicit
+# order instead (show sits with the other tenant-lookup commands, right
+# after fetch, rather than alphabetically after list).
+for _sort_key, _command_name in enumerate(["add", "delete", "edit", "fetch", "show", "list", "settings"]):
+    app[_command_name].sort_key = _sort_key
 
 
 def main(argv: list[str] | None = None) -> None:
