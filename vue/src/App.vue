@@ -231,15 +231,6 @@ import { useEel } from "@/composables/useEel"
 import type { LoadingInstance } from "element-plus/es/components/loading/src/loading.mjs"
 import type { FetchResult } from "./types/FetchResult"
 
-/**
- * Core fetch/tenant services return plain, newline-separated text (no HTML).
- * The message boxes below render with dangerouslyUseHTMLString, so convert
- * newlines to <br> here at the display layer before showing them.
- */
-function nlToBr(text: string): string {
-  return text.replace(/\n/g, "<br>")
-}
-
 // Refs
 const allTenants: Ref<TenantSettings[]> = ref([]) // All the tenants in JSON file. See filteredTenants for the tenants that are displayed in the left side of the screen.
 const selectedTenant: Ref<TenantSettings | null> = ref(null)
@@ -312,6 +303,15 @@ watch(
   },
   { deep: true },
 )
+
+/**
+ * Core fetch/tenant services return plain, newline-separated text (no HTML).
+ * The message boxes below render with dangerouslyUseHTMLString, so convert
+ * newlines to <br> here at the display layer before showing them.
+ */
+function nlToBr(text: string): string {
+  return text.replace(/\n/g, "<br>")
+}
 
 // Calls Python which loads tenant settings from JSON
 async function getTenantSettings(initialLoad: boolean = false): Promise<TenantSettings[]> {
