@@ -7,6 +7,8 @@ Spec: `.scratch/crmfetch-cli/spec.md`
 
 **Before writing any code, load the `coding-style` skill and follow it for everything in this ticket.**
 
+**This environment is the developer's real, live desktop — not an isolated sandbox.** Never attempt real display/mouse/keyboard interaction or screen capture. Verify the built binaries by running them directly (with args, checking stdout/exit codes) rather than clicking through a launched GUI window. Any manual double-click/visual verification is always a human follow-up — leave it honestly unchecked rather than attempting it yourself (see ticket 01's Comments for what happened when this wasn't followed).
+
 ## Description
 
 Update the PyInstaller build configuration (`CRMScript Fetcher.spec` and/or the `python -m eel`-style build command in `readme.md`) so that:

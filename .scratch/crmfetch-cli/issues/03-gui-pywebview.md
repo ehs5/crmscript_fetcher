@@ -7,6 +7,8 @@ Spec: `.scratch/crmfetch-cli/spec.md`
 
 **Before writing any code, load the `coding-style` skill and follow it for everything in this ticket.**
 
+**This environment is the developer's real, live desktop — not an isolated sandbox.** Never attempt real display/mouse/keyboard interaction or screen capture. Verify anything GUI-adjacent via code inspection, protocol/API-level calls, or headless checks only. The manual smoke-test criterion below is always a human follow-up — leave it honestly unchecked rather than attempting it yourself (see ticket 01's Comments for what happened when this wasn't followed).
+
 ## Description
 
 Eel is discontinued. Replace it with pywebview, calling the core extracted in ticket 01 directly and in-process. The Vue frontend itself (`vue/src/`) should stay largely as-is — only the JS↔Python bridge layer changes shape.

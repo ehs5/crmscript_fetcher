@@ -7,6 +7,8 @@ Spec: `.scratch/crmfetch-cli/spec.md`
 
 **Before writing any code, load the `coding-style` skill and follow it for everything in this ticket.**
 
+**This environment is the developer's real, live desktop — not an isolated sandbox.** Never attempt real display/mouse/keyboard interaction or screen capture. Verify anything GUI-adjacent via code inspection, protocol/API-level calls, or headless checks only. Any manual click-through step is always a human follow-up — leave its acceptance criterion honestly unchecked rather than attempting it yourself (see ticket 01's Comments for what happened when this wasn't followed).
+
 ## Description
 
 Build a flag-based CLI ("crmfetch") using Cyclopts, calling the core extracted in ticket 01 directly and in-process (no subprocess relationship). No wizard/interactive mode. No `fetch --all` and no implicit "fetch everything" behavior — `fetch` always requires an explicit id.
