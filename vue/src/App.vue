@@ -231,6 +231,15 @@ import { useEel } from "@/composables/useEel"
 import type { LoadingInstance } from "element-plus/es/components/loading/src/loading.mjs"
 import type { FetchResult } from "./types/FetchResult"
 
+/**
+ * Core fetch/tenant services return plain, newline-separated text (no HTML).
+ * The message boxes below render with dangerouslyUseHTMLString, so convert
+ * newlines to <br> here at the display layer before showing them.
+ */
+function nlToBr(text: string): string {
+  return text.replace(/\n/g, "<br>")
+}
+
 // Refs
 const allTenants: Ref<TenantSettings[]> = ref([]) // All the tenants in JSON file. See filteredTenants for the tenants that are displayed in the left side of the screen.
 const selectedTenant: Ref<TenantSettings | null> = ref(null)
@@ -391,7 +400,7 @@ async function handleFetch() {
 
     // Handle validation errors.
     if (result.validation_error) {
-      await ElMessageBox.alert(result.error, "Validation Error", {
+      await ElMessageBox.alert(nlToBr(result.error), "Validation Error", {
         type: "error",
         roundButton: true,
         dangerouslyUseHTMLString: true,
@@ -401,7 +410,7 @@ async function handleFetch() {
 
     // Handle general errors.
     if (!result.success) {
-      await ElMessageBox.alert(result.error, "Error", {
+      await ElMessageBox.alert(nlToBr(result.error), "Error", {
         type: "error",
         roundButton: true,
         dangerouslyUseHTMLString: true,
@@ -412,7 +421,7 @@ async function handleFetch() {
     // Fetch was succesful.
     // Handle success (show info first if exists, this only happens on invalid crmscript version).
     if (result.info) {
-      await ElMessageBox.alert(result.info, "Note", {
+      await ElMessageBox.alert(nlToBr(result.info), "Note", {
         type: "warning",
         roundButton: true,
         dangerouslyUseHTMLString: true,
