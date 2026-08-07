@@ -91,10 +91,6 @@ app = cyclopts.App(
 _options_group = cyclopts.Group("Options")
 app["--help"].group = _options_group
 app["--version"].group = _options_group
-# --help doesn't need to be listed - if you're reading this listing, you've
-# already found it. --version stays listed here (shown on --help only,
-# hidden again on the bare splash above).
-app["--help"].show = False
 
 # Left unset at import time - built lazily by _resolve_tenant_service() from
 # the CLI's own settings pointer (cli_config.py) the first time a command
