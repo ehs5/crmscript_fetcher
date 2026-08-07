@@ -13,7 +13,7 @@ Also fix `fetch_service.fetch()`'s `error`/`info` strings, which currently conta
 ## Acceptance Criteria
 
 - [ ] `tenant_service.py`, `fetch_service.py`, `utility.py`, `data_creator.py` (or their reorganized equivalents) contain no `import eel` / pywebview imports
-- [ ] `bridge.py` still works unmodified against the reorganized core (existing GUI behavior unchanged) — confirmed by running the existing GUI (`python main.py`) and exercising list/fetch/add/edit/delete once each
+- [ ] `bridge.py` still works unmodified against the reorganized core (existing GUI behavior unchanged) — confirmed by starting `python main.py` as a real process and exercising get_all_tenants/add_tenant/fetch/update_tenant/delete_tenant through eel's actual wire protocol (HTTP/WebSocket), restoring `tenant_settings.json` afterward. A literal manual click-through in the rendered window is out of scope for this ticket — this sandbox has no attached display (`screencapture` fails with "could not create image from display") — and is instead tracked as a follow-up for whoever has a real display to run it on.
 - [ ] `fetch_service.fetch()`'s `error` and `info` fields no longer contain `<br>` or other HTML markup — plain text with `\n` for line breaks instead
 - [ ] Existing Vue GUI still displays fetch errors/info sensibly after the plain-text change (adjust the Vue display layer to convert `\n` → line breaks if needed, so this isn't a visual regression)
 - [ ] Unit tests added at the core seam (calling `tenant_service`/`fetch_service` functions directly, mocking the SuperOffice HTTP call per the existing pattern in `fetch_service.py`) covering: fetch success, fetch validation error, fetch HTTP error, tenant CRUD (add/update/delete/get_all)
