@@ -22,9 +22,7 @@ def enforce_single_instance(port: int) -> socket.socket:
 def run_gui() -> None:
     # Fix for PyInstaller subprocess fileno errors when running as a --noconsole/windowed
     # bundle: sys.stdout/stderr have no real fileno there, which some native GUI backends
-    # (e.g. spawning a WebView2 loader on Windows) don't tolerate. Scoped to this function
-    # (not module level) so it never touches stdout/stderr on the CLI dispatch branch in
-    # root main.py - crmfetch's output has to keep reaching the calling terminal.
+    # (e.g. spawning a WebView2 loader on Windows) don't tolerate.
     if hasattr(sys, '_MEIPASS'):  # Running in a PyInstaller bundle
         log_path = Path(__file__).parent / 'webview_log.txt'
         sys.stdout = open(log_path, 'a')

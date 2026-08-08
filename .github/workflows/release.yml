@@ -97,10 +97,9 @@ jobs:
           npm ci
           npm run build
 
-      - name: Build Windows executables
-        # Produces dist/CRMScript Fetcher/CRMScript Fetcher.exe (GUI) and
-        # crmfetch.exe (CLI) side by side - see CRMScript Fetcher.spec's
-        # sys.platform == 'win32' branch.
+      - name: Build Windows GUI
+        # Produces dist/CRMScript Fetcher/CRMScript Fetcher.exe. GUI-only -
+        # the CLI is uv-install-only, see readme.md.
         run: pyinstaller "CRMScript Fetcher.spec"
 
       - name: Zip both executables

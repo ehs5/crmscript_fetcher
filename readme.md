@@ -116,11 +116,8 @@ window against the freshly built `gui/vue/dist`.
 pyinstaller "CRMScript Fetcher.spec"
 ```
 
-This creates folder **dist/CRMScript Fetcher.app** - a single dual-mode binary/bundle. Double-clicking
-it (or running it with no arguments) opens the GUI exactly like before. Running the binary inside the
-bundle (`dist/CRMScript Fetcher.app/Contents/MacOS/CRMScript Fetcher`) with arguments instead runs the
-`crmfetch` CLI and prints its output to the calling terminal - macOS executables have no GUI/console
-subsystem split, so one binary can do both.
+This creates **dist/CRMScript Fetcher.app**. Double-click it (or run it with no arguments) to open
+the GUI.
 
 **Windows:**
 
@@ -128,18 +125,18 @@ subsystem split, so one binary can do both.
 pyinstaller "CRMScript Fetcher.spec"
 ```
 
-The same spec file builds two separate executables into one **dist/CRMScript Fetcher** folder on
-Windows (it branches on `sys.platform` internally):
-- `CRMScript Fetcher.exe` - GUI subsystem (`console=False`), unchanged double-click GUI experience.
-- `crmfetch.exe` - console subsystem (`console=True`), for use from PowerShell/cmd.
+This creates **dist/CRMScript Fetcher/CRMScript Fetcher.exe**. Double-click it to open the GUI.
 
-Windows needs both because a GUI-subsystem `.exe` invoked with CLI arguments from a terminal has no
-attached console and silently drops all stdout/stderr - the same constraint Electron/Tauri apps hit
-(why VS Code ships a separate `code.cmd` shim), and the same reason Windows Python installs ship both
-`python.exe` and `pythonw.exe`. Both executables come from a single `pyinstaller` invocation and a
-single `COLLECT` on purpose: PyInstaller's `COLLECT` fully owns and rebuilds its named output
-directory on every run, so two separate spec files/invocations both targeting `dist/CRMScript Fetcher`
-would clobber each other instead of coexisting.
+Both builds are GUI-only - there's no bundled CLI executable on either platform. The `crmfetch` CLI
+is install-only, via [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv tool install git+https://github.com/ehs5/crmscript_fetcher.git
+```
+
+This gives a real `crmfetch` command on PATH, identical on macOS and Windows, that updates cleanly
+(`uv tool install --reinstall ...`) - a better experience than a bundled exe would give either way,
+so there's no reason to duplicate it into the GUI build.
 
 ## Built With
 
