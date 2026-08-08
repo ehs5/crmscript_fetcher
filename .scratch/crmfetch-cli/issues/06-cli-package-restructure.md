@@ -25,10 +25,10 @@ Update `pyproject.toml`'s `[tool.poetry] packages` and `[project.scripts]` entry
 
 ## Acceptance Criteria
 
-- [ ] Files reorganized as above; `tenant_settings.py` deleted
-- [ ] Root dispatcher stays a separate, minimal file from `gui/main.py`'s actual GUI-launching code
-- [ ] macOS dual-mode build (no args -> GUI, args -> CLI) still works after the split
-- [ ] `pyproject.toml` packaging config and entry point updated
-- [ ] Tests updated to new import paths, no behavior changes
-- [ ] `uv tool install .` still works; full test suite passes
-- [ ] GUI behavior unchanged
+- [x] Files reorganized as above; `tenant_settings.py` deleted
+- [x] Root dispatcher stays a separate, minimal file from `gui/main.py`'s actual GUI-launching code
+- [x] macOS dual-mode build (no args -> GUI, args -> CLI) still works after the split
+- [x] `pyproject.toml` packaging config and entry point updated
+- [x] Tests updated to new import paths, no behavior changes
+- [x] `uv tool install .` still works; full test suite passes
+- [x] GUI behavior unchanged
