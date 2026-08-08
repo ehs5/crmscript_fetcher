@@ -65,9 +65,21 @@ errors. Usually this works itself out by running the fetch again.
 
 ## Getting Started
 
-1. Head over to Releases on the right-hand side to download. 
+**GUI:**
 
-2. Unpack the zip file wherever you want
+1. Head over to Releases on the right-hand side and download the zip for your OS (macOS or Windows).
+
+2. Unpack it wherever you want.
+
+**CLI:**
+
+Requires [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv tool install git+https://github.com/ehs5/crmscript_fetcher.git
+```
+
+Installs the `crmfetch` command, same on macOS and Windows.
 
 ## How to use
 
@@ -109,36 +121,24 @@ window against the freshly built `gui/vue/dist`.
 
 PyInstaller can't cross-compile, so each of these must be run natively on its own OS.
 
-**macOS:**
-
-```bash
-./build-macos.sh
-```
-
-One command - builds the Vue frontend, sets up a `.venv` if needed, installs Python dependencies,
-and runs PyInstaller. Creates **dist/CRMScript Fetcher.app**. Double-click it (or run it with no
-arguments) to open the GUI.
-
 **Windows:**
 
 ```powershell
 .\build-windows.ps1
 ```
 
-One command - builds the Vue frontend, sets up a `.venv` if needed, installs Python dependencies,
-and runs PyInstaller. Creates **dist/CRMScript Fetcher/CRMScript Fetcher.exe**. Double-click it to
-open the GUI.
+This first builds the Vue frontend, then packages the Python GUI app. It creates **dist/CRMScript Fetcher/CRMScript Fetcher.exe**.
 
-Both builds are GUI-only - there's no bundled CLI executable on either platform. The `crmfetch` CLI
-is install-only, via [uv](https://docs.astral.sh/uv/):
+**macOS:**
 
 ```bash
-uv tool install git+https://github.com/ehs5/crmscript_fetcher.git
+./build-macos.sh
 ```
 
-This gives a real `crmfetch` command on PATH, identical on macOS and Windows, that updates cleanly
-(`uv tool install --reinstall ...`) - a better experience than a bundled exe would give either way,
-so there's no reason to duplicate it into the GUI build.
+This first builds the Vue frontend, then packages the Python GUI app. It creates **dist/CRMScript Fetcher.app**.
+
+Both builds are GUI-only - there's no bundled CLI executable. `crmfetch` is installed via `uv`
+instead (see Getting Started above), which builds it from source as part of the install.
 
 ## Built With
 
