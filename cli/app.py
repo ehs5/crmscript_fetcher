@@ -128,7 +128,3 @@ def main(argv: list[str] | None = None) -> None:
         app(argv, exit_on_error=False)
     except cyclopts.CycloptsError:
         sys.exit(2)
-
-
-if __name__ == "__main__":
-    main()
