@@ -45,17 +45,8 @@ jobs:
           cache: "npm"
           cache-dependency-path: gui/vue/package-lock.json
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-
-      - name: Build Vue frontend
-        run: |
-          cd gui/vue
-          npm ci
-          npm run build
-
-      - name: Build macOS app
-        run: pyinstaller "CRMScript Fetcher.spec"
+      - name: Run build script
+        run: ./build-macos.sh
 
       - name: Zip app bundle
         run: |
@@ -88,19 +79,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: gui/vue/package-lock.json
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-
-      - name: Build Vue frontend
-        run: |
-          cd gui/vue
-          npm ci
-          npm run build
-
-      - name: Build Windows GUI
+      - name: Run build script
         # Produces dist/CRMScript Fetcher/CRMScript Fetcher.exe. GUI-only -
         # the CLI is uv-install-only, see readme.md.
-        run: pyinstaller "CRMScript Fetcher.spec"
+        run: .\build-windows.ps1
 
       - name: Zip both executables
         run: |
