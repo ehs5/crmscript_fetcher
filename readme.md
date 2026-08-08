@@ -107,22 +107,37 @@ window against the freshly built `vue/dist`.
 
 ### How to Build
 1. From vue folder, run: `npm run build`
-2. From root folder, package Python code with Eeel's PyInstaller:
-
-**Windows:**
-```bash
-python -m eel main.py vue/dist --onedir --noconsole --icon=icon.ico --name "CRMScript Fetcher" --add-data "tenant_settings.json;." --add-data "crmscript_fetcher.crmscript;." --add-data "pyproject.toml;."
-```
-
-This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.exe file in it.
+2. From root folder, package Python code with PyInstaller, using the checked-in `.spec` files
+   (PyInstaller can't cross-compile, so each of these must be run natively on its own OS):
 
 **macOS:**
 
 ```bash
-python -m eel main.py vue/dist --onedir --noconsole --icon=icon.icns --name "CRMScript Fetcher" --add-data "tenant_settings.json:." --add-data "crmscript_fetcher.crmscript:." --add-data "pyproject.toml:."
+pyinstaller "CRMScript Fetcher.spec"
 ```
 
-This creates folder **dist/CRMScript Fetcher** with a CRMScript Fetcher.app bundle in it. Note the `:` instead of `;` in `--add-data`, and `icon.icns` instead of `icon.ico` — both are macOS/Windows conventions respectively (PyInstaller can't cross-compile, so this must be run natively on each OS).
+This creates folder **dist/CRMScript Fetcher.app** - a single dual-mode binary/bundle. Double-clicking
+it (or running it with no arguments) opens the GUI exactly like before. Running the binary inside the
+bundle (`dist/CRMScript Fetcher.app/Contents/MacOS/CRMScript Fetcher`) with arguments instead runs the
+`crmfetch` CLI and prints its output to the calling terminal - macOS executables have no GUI/console
+subsystem split, so one binary can do both.
+
+**Windows:**
+
+```bash
+pyinstaller "CRMScript Fetcher.spec"
+pyinstaller crmfetch.spec
+```
+
+This builds two separate executables into the same **dist/CRMScript Fetcher** folder:
+- `CRMScript Fetcher.exe` - GUI subsystem (`console=False`), unchanged double-click GUI experience.
+- `crmfetch.exe` - console subsystem (`console=True`), for use from PowerShell/cmd.
+
+Windows needs both because a GUI-subsystem `.exe` invoked with CLI arguments from a terminal has no
+attached console and silently drops all stdout/stderr - the same constraint Electron/Tauri apps hit
+(why VS Code ships a separate `code.cmd` shim), and the same reason Windows Python installs ship both
+`python.exe` and `pythonw.exe`. Run both `pyinstaller` commands (in either order) before zipping the
+folder for release - the two builds share one output folder so a single zip carries both executables.
 
 ## Built With
 
