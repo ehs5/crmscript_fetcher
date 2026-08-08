@@ -106,26 +106,28 @@ local HTTP server. There's no separate dev-server hybrid anymore - to see your c
 window against the freshly built `gui/vue/dist`.
 
 ### How to Build
-1. From the `gui/vue` folder, run: `npm run build`
-2. From root folder, package Python code with PyInstaller, using the checked-in `.spec` files
-   (PyInstaller can't cross-compile, so each of these must be run natively on its own OS):
+
+PyInstaller can't cross-compile, so each of these must be run natively on its own OS.
 
 **macOS:**
 
 ```bash
-pyinstaller "CRMScript Fetcher.spec"
+./build-macos.sh
 ```
 
-This creates **dist/CRMScript Fetcher.app**. Double-click it (or run it with no arguments) to open
-the GUI.
+One command - builds the Vue frontend, sets up a `.venv` if needed, installs Python dependencies,
+and runs PyInstaller. Creates **dist/CRMScript Fetcher.app**. Double-click it (or run it with no
+arguments) to open the GUI.
 
 **Windows:**
 
-```bash
-pyinstaller "CRMScript Fetcher.spec"
+```powershell
+.\build-windows.ps1
 ```
 
-This creates **dist/CRMScript Fetcher/CRMScript Fetcher.exe**. Double-click it to open the GUI.
+One command - builds the Vue frontend, sets up a `.venv` if needed, installs Python dependencies,
+and runs PyInstaller. Creates **dist/CRMScript Fetcher/CRMScript Fetcher.exe**. Double-click it to
+open the GUI.
 
 Both builds are GUI-only - there's no bundled CLI executable on either platform. The `crmfetch` CLI
 is install-only, via [uv](https://docs.astral.sh/uv/):
