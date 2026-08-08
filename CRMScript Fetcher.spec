@@ -32,7 +32,12 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['icon.icns'],
+    # Branched like exe_cli's icon below: PyInstaller's Windows icon path only accepts
+    # .ico/.exe (PyInstaller/utils/win32/icon.py normalize_icon_type), not .icns. Since
+    # Pillow is installed, an un-branched icon=['icon.icns'] would silently succeed on
+    # Windows by auto-converting to a generated .ico instead of using the hand-crafted
+    # icon.ico already in the repo - a real icon regression, not just a build-time note.
+    icon=['icon.ico'] if sys.platform == 'win32' else ['icon.icns'],
 )
 
 # One COLLECT call is required here rather than a second standalone spec file/pyinstaller
