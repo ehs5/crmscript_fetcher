@@ -17,8 +17,8 @@ Add `search_tenants(query: str) -> list[dict]` to `TenantService` in `core` - ca
 
 ## Acceptance Criteria
 
-- [ ] `TenantService.search_tenants(query)` added to core, matches the Vue filter's behavior (case-insensitive, name or URL substring)
-- [ ] `crmfetch search <query>` command added, with `--json` like `list`
-- [ ] Core tests for `search_tenants`; CLI-seam test confirming the command wires to it
-- [ ] No change to the GUI - this ticket is core+CLI only
-- [ ] Code follows the `coding-style` skill
+- [x] `TenantService.search_tenants(query)` added to core, matches the Vue filter's behavior (case-insensitive, name or URL substring)
+- [x] `crmfetch search <query>` command added, with `--json` like `list`
+- [x] Core tests for `search_tenants`; CLI-seam test confirming the command wires to it
+- [x] No change to the GUI - this ticket is core+CLI only
+- [x] Code follows the `coding-style` skill
