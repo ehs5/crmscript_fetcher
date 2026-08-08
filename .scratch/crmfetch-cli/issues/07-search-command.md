@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Blocked by: 06
 
 # Add a search command
