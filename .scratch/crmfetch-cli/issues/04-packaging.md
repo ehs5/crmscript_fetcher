@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Blocked by: 02, 03
 
 # Packaging: macOS dual-mode binary + Windows two-binary split
