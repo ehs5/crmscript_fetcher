@@ -104,7 +104,7 @@ from cli import tenant_commands, settings_commands  # noqa: E402,F401
 # Cyclopts sorts commands alphabetically by default; this pins an explicit
 # order instead (show sits with the other tenant-lookup commands, right
 # after fetch, rather than alphabetically after list).
-for _sort_key, _command_name in enumerate(["add", "delete", "edit", "fetch", "show", "list", "settings"]):
+for _sort_key, _command_name in enumerate(["add", "delete", "edit", "fetch", "show", "list", "search", "settings"]):
     app[_command_name].sort_key = _sort_key
     # help_prologue would otherwise be inherited from app onto every
     # subcommand's own --help too - fine for `crmfetch -h` itself, but the

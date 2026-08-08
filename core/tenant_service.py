@@ -38,6 +38,22 @@ class TenantService:
         tenant_index: int = self.get_tenant_index(all_tenants, tenant_id)
         return all_tenants[tenant_index]
 
+    def search_tenants(self, query: str) -> list[dict]:
+        """
+        Returns tenants whose name or URL contains query, case-insensitive.
+        Mirrors the Vue GUI's client-side filteredTenants logic exactly
+        (gui/vue/src/App.vue) - an empty query returns every tenant unfiltered.
+        """
+        all_tenants: list[dict] = self.get_all_tenants()
+        if not query:
+            return all_tenants
+
+        lowered_query: str = query.lower()
+        return [
+            tenant for tenant in all_tenants
+            if lowered_query in tenant["tenant_name"].lower() or lowered_query in tenant["url"].lower()
+        ]
+
     def add_missing_fetch_options(self, all_tenants: list[dict]) -> list[dict]:
         """
         Checks if there are any tenants without "fetch options", and if so adds a default dictionary to each.

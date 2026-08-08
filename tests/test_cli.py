@@ -79,6 +79,43 @@ def test_list_human_prints_id_name_url_per_tenant(
     assert "2: Beta (https://beta.example)" in out
 
 
+def test_search_json_prints_matching_tenants_as_valid_json(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.search_tenants.return_value = [
+        {"id": 1, "tenant_name": "Acme", "url": "https://acme.example"}
+    ]
+
+    exit_code: int = run(["search", "acme", "--json"])
+
+    assert exit_code == 0
+    tenant_service.search_tenants.assert_called_once_with("acme")
+    printed: list[dict] = json.loads(capsys.readouterr().out)
+    assert printed == [{"id": 1, "tenant_name": "Acme", "url": "https://acme.example"}]
+
+
+def test_search_human_prints_id_name_url_per_matching_tenant(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.search_tenants.return_value = [
+        {"id": 2, "tenant_name": "Beta", "url": "https://beta.example"},
+    ]
+
+    exit_code: int = run(["search", "beta"])
+
+    assert exit_code == 0
+    tenant_service.search_tenants.assert_called_once_with("beta")
+    out: str = capsys.readouterr().out
+    assert "2: Beta (https://beta.example)" in out
+
+
+def test_search_without_query_is_a_usage_error(tenant_service: Mock) -> None:
+    exit_code: int = run(["search"])
+
+    assert exit_code == 2
+    tenant_service.search_tenants.assert_not_called()
+
+
 def test_fetch_calls_get_tenant_by_id_then_fetches_that_tenant(
     tenant_service: Mock, fetch_service: Mock
 ) -> None:

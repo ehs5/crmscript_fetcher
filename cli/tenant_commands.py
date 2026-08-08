@@ -79,6 +79,32 @@ def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json
     return 0
 
 
+@app.command(name="search")
+def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False) -> int:
+    """Searches tenants by name or URL substring, case-insensitive.
+
+    Parameters
+    ----------
+    query: str
+        Substring to match against a tenant's name or URL.
+    json_output: bool
+        Print the full tenant objects as JSON instead of a human-readable summary.
+    """
+    service: TenantService | None = _resolve_tenant_service()
+    if service is None:
+        return 1
+
+    tenants: list[dict] = service.search_tenants(query)
+
+    if json_output:
+        print(json.dumps(tenants, indent=4))
+        return 0
+
+    for tenant in tenants:
+        print(_tenant_summary(tenant))
+    return 0
+
+
 @app.command(name="show")
 def show_tenant(tenant_id: int) -> int:
     """Prints the full JSON for one tenant.

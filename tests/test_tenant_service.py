@@ -152,6 +152,47 @@ def test_get_all_tenants_without_initial_load_does_not_backfill(
     assert tenants[0].get("fetch_options") is None
 
 
+def test_search_tenants_matches_name_case_insensitively(service: TenantService) -> None:
+    service.add_tenant({"tenant_name": "Acme", "url": "https://acme.example"})
+    service.add_tenant({"tenant_name": "Beta", "url": "https://beta.example"})
+
+    results: list[dict] = service.search_tenants("ACME")
+
+    assert [t["tenant_name"] for t in results] == ["Acme"]
+
+
+def test_search_tenants_matches_url_case_insensitively(service: TenantService) -> None:
+    service.add_tenant({"tenant_name": "Acme", "url": "https://acme.example"})
+    service.add_tenant({"tenant_name": "Beta", "url": "https://beta.example"})
+
+    results: list[dict] = service.search_tenants("BETA.EXAMPLE")
+
+    assert [t["tenant_name"] for t in results] == ["Beta"]
+
+
+def test_search_tenants_matches_substring_not_just_full_value(service: TenantService) -> None:
+    service.add_tenant({"tenant_name": "Acme Corp", "url": "https://acme.example"})
+
+    results: list[dict] = service.search_tenants("me co")
+
+    assert [t["tenant_name"] for t in results] == ["Acme Corp"]
+
+
+def test_search_tenants_empty_query_returns_all_tenants(service: TenantService) -> None:
+    service.add_tenant({"tenant_name": "Acme", "url": "https://acme.example"})
+    service.add_tenant({"tenant_name": "Beta", "url": "https://beta.example"})
+
+    results: list[dict] = service.search_tenants("")
+
+    assert [t["tenant_name"] for t in results] == ["Acme", "Beta"]
+
+
+def test_search_tenants_no_match_returns_empty_list(service: TenantService) -> None:
+    service.add_tenant({"tenant_name": "Acme", "url": "https://acme.example"})
+
+    assert service.search_tenants("nonexistent") == []
+
+
 def test_explicit_settings_path_is_used_directly(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """
     An explicit settings_path must be used as-is, bypassing get_app_directory()
