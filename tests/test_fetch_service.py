@@ -12,7 +12,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from fetch_service import FetchService
+from core.fetch_service import FetchService
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ def test_fetch_success(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
         "script_version": 2,
         "group_scripts": {"script_folders": [], "scripts": []},
     }
-    monkeypatch.setattr("fetch_service.requests.get", lambda url: mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: mock_response(json.dumps(payload)))
 
     result: dict = FetchService().fetch(tenant)
 
@@ -62,7 +62,7 @@ def test_fetch_success(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
 def test_fetch_success_flags_outdated_script_version(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
     # No script_version key -> defaults to v1, which is older than CURRENT_CRMSCRIPT_VERSION.
     payload: dict = {"script_folders": [], "scripts": [], "triggers": []}
-    monkeypatch.setattr("fetch_service.requests.get", lambda url: mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: mock_response(json.dumps(payload)))
 
     result: dict = FetchService().fetch(tenant)
 
@@ -96,7 +96,7 @@ def test_fetch_http_connection_error(monkeypatch: pytest.MonkeyPatch, tenant: di
     def raise_connection_error(url: str) -> None:
         raise requests.ConnectionError("connection refused")
 
-    monkeypatch.setattr("fetch_service.requests.get", raise_connection_error)
+    monkeypatch.setattr("core.fetch_service.requests.get", raise_connection_error)
 
     result: dict = FetchService().fetch(tenant)
 
@@ -109,7 +109,7 @@ def test_fetch_http_connection_error(monkeypatch: pytest.MonkeyPatch, tenant: di
 def test_fetch_http_error_status(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
     response: Mock = mock_response("")
     response.raise_for_status.side_effect = requests.HTTPError("500 Server Error")
-    monkeypatch.setattr("fetch_service.requests.get", lambda url: response)
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: response)
 
     result: dict = FetchService().fetch(tenant)
 
@@ -119,7 +119,7 @@ def test_fetch_http_error_status(monkeypatch: pytest.MonkeyPatch, tenant: dict) 
 
 
 def test_fetch_invalid_json_response(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
-    monkeypatch.setattr("fetch_service.requests.get", lambda url: mock_response("not valid json"))
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: mock_response("not valid json"))
 
     result: dict = FetchService().fetch(tenant)
 

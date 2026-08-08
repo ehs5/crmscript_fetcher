@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from tenant_service import TenantService
+from core.tenant_service import TenantService
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def settings_file(tmp_path: Path) -> Path:
 @pytest.fixture
 def service(settings_file: Path, monkeypatch: pytest.MonkeyPatch) -> TenantService:
     """Returns a TenantService pointed at the fixture's tenant_settings.json."""
-    monkeypatch.setattr("tenant_service.get_app_directory", lambda: settings_file.parent)
+    monkeypatch.setattr("core.tenant_service.get_app_directory", lambda: settings_file.parent)
     return TenantService()
 
 
@@ -166,7 +166,7 @@ def test_explicit_settings_path_is_used_directly(tmp_path: Path, monkeypatch: py
     def fail_if_called() -> Path:
         raise AssertionError("get_app_directory() must not be called when an explicit path is given")
 
-    monkeypatch.setattr("tenant_service.get_app_directory", fail_if_called)
+    monkeypatch.setattr("core.tenant_service.get_app_directory", fail_if_called)
 
     service = TenantService(explicit_path)
 
@@ -182,7 +182,7 @@ def test_no_argument_constructor_still_resolves_via_get_app_directory(
     settings_path parameter - this is the GUI's own default and must keep
     resolving via get_app_directory() exactly as before.
     """
-    monkeypatch.setattr("tenant_service.get_app_directory", lambda: tmp_path)
+    monkeypatch.setattr("core.tenant_service.get_app_directory", lambda: tmp_path)
     (tmp_path / "tenant_settings.json").write_text("[]")
 
     service = TenantService()

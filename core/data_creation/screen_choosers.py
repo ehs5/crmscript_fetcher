@@ -1,6 +1,6 @@
-from utility import create_file
-from utility import create_json_file
-from utility import safe_name
+from core.utility import create_file
+from core.utility import create_json_file
+from core.utility import safe_name
 
 
 def create_screen_chooser_files(screen_choosers_directory: str, screen_choosers: list[dict]) -> None:

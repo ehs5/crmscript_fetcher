@@ -23,8 +23,10 @@ def get_app_directory() -> Path:
     # When ran as .exe bundled by PyInstaller
     if getattr(sys, 'frozen', False):
         return Path(sys._MEIPASS)
-    # When running from source
-    return Path(__file__).resolve().parent
+    # When running from source, utility.py lives one level down (core/), so
+    # the app directory (where tenant_settings.json/pyproject.toml/
+    # crmscript_fetcher.crmscript live) is its parent's parent.
+    return Path(__file__).resolve().parent.parent
 
 def ask_directory_path_macos() -> str:
     """

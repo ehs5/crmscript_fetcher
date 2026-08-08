@@ -15,7 +15,8 @@ from pathlib import Path
 import pytest
 
 import cli
-from utility import get_app_directory
+import cli.tenant_commands
+from core.utility import get_app_directory
 
 
 def shipped_default_tenants() -> list[dict]:
@@ -27,19 +28,20 @@ def shipped_default_tenants() -> list[dict]:
 @pytest.fixture(autouse=True)
 def reset_tenant_service_singleton(monkeypatch: pytest.MonkeyPatch) -> None:
     """
-    cli.tenant_service is a module-level cache, lazily populated by the first
-    command that resolves it. Force it back to unresolved before every test
-    in this file, so each test genuinely exercises pointer resolution instead
-    of reusing whatever a previous test (in this file or another) resolved.
+    cli.tenant_commands.tenant_service is a module-level cache, lazily
+    populated by the first command that resolves it. Force it back to
+    unresolved before every test in this file, so each test genuinely
+    exercises pointer resolution instead of reusing whatever a previous test
+    (in this file or another) resolved.
     """
-    monkeypatch.setattr(cli, "tenant_service", None)
+    monkeypatch.setattr(cli.tenant_commands, "tenant_service", None)
 
 
 @pytest.fixture(autouse=True)
 def isolated_config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Points platformdirs.user_config_dir("crmfetch") at a tmp directory for every test."""
     config_dir: Path = tmp_path / "config"
-    monkeypatch.setattr("cli_config.platformdirs.user_config_dir", lambda name: str(config_dir / name))
+    monkeypatch.setattr("cli.cli_config.platformdirs.user_config_dir", lambda name: str(config_dir / name))
     return config_dir
 
 

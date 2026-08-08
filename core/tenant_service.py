@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from utility import get_app_directory
+from core.utility import get_app_directory
 
 
 class TenantService:

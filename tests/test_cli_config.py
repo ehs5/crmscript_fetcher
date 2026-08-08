@@ -8,7 +8,7 @@ location, per the ticket's testing requirement.
 import json
 from pathlib import Path
 
-from cli_config import CliConfig
+from cli.cli_config import CliConfig
 
 
 def test_get_active_settings_path_returns_none_when_config_file_missing(tmp_path: Path) -> None:
@@ -58,7 +58,7 @@ def test_get_active_settings_path_returns_none_when_pointer_field_empty(tmp_path
 
 def test_default_config_dir_uses_platformdirs(monkeypatch, tmp_path: Path) -> None:
     """Confirms the no-argument constructor defers to platformdirs, not a hardcoded path."""
-    monkeypatch.setattr("cli_config.platformdirs.user_config_dir", lambda name: str(tmp_path / name))
+    monkeypatch.setattr("cli.cli_config.platformdirs.user_config_dir", lambda name: str(tmp_path / name))
 
     config = CliConfig()
 

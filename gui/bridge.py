@@ -1,10 +1,10 @@
 # Exposes core tenant/fetch functions to the Vue frontend via pywebview.
-# An Api instance is passed to webview.create_window(..., js_api=...) in main.py;
+# An Api instance is passed to webview.create_window(..., js_api=...) in gui/main.py;
 # pywebview reflects over its public methods, so each one below becomes callable
 # from Vue as window.pywebview.api.<method_name>(...).
-from fetch_service import FetchService
-from tenant_service import TenantService
-from utility import ask_directory_path, get_current_version, get_fetcher_script, open_directory
+from core.fetch_service import FetchService
+from core.tenant_service import TenantService
+from core.utility import ask_directory_path, get_current_version, get_fetcher_script, open_directory
 
 
 class Api:

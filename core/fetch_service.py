@@ -1,7 +1,7 @@
 import json
 import requests
 from requests import Response
-from data_creator import DataCreator
+from core.data_creator import DataCreator
 
 CURRENT_CRMSCRIPT_VERSION = 2
 

@@ -1,5 +1,5 @@
-from utility import create_json_file
-from utility import safe_name
+from core.utility import create_json_file
+from core.utility import safe_name
 
 
 def remove_schedule_keys(schedule: dict) -> dict:

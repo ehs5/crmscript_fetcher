@@ -1,13 +1,13 @@
-from utility import create_folder
-from utility import delete_folder
-from utility import move_folder
+from core.utility import create_folder
+from core.utility import delete_folder
+from core.utility import move_folder
 
-from data_creation.scripts import create_scripts_hierarchy
-from data_creation.triggers import create_trigger_files
-from data_creation.screens import create_screens_hierarchy
-from data_creation.screen_choosers import create_screen_chooser_files
-from data_creation.scheduled_tasks import create_scheduled_tasks_files
-from data_creation.tables import create_table_hierarchy
+from core.data_creation.scripts import create_scripts_hierarchy
+from core.data_creation.triggers import create_trigger_files
+from core.data_creation.screens import create_screens_hierarchy
+from core.data_creation.screen_choosers import create_screen_chooser_files
+from core.data_creation.scheduled_tasks import create_scheduled_tasks_files
+from core.data_creation.tables import create_table_hierarchy
 
 from typing import Optional
 from typing import Callable

@@ -101,12 +101,12 @@ All your tenant settings will be saved locally in the tenant_settings.json file.
 The GUI runs on pywebview, which talks to Python in-process rather than over Eel's old
 local HTTP server. There's no separate dev-server hybrid anymore - to see your changes:
 
-1. From the `vue` folder, run `npm run build`.
+1. From the `gui/vue` folder, run `npm run build`.
 2. Run `main.py` in your Python IDE (or `python main.py` from root). This opens the pywebview
-window against the freshly built `vue/dist`.
+window against the freshly built `gui/vue/dist`.
 
 ### How to Build
-1. From vue folder, run: `npm run build`
+1. From the `gui/vue` folder, run: `npm run build`
 2. From root folder, package Python code with PyInstaller, using the checked-in `.spec` files
    (PyInstaller can't cross-compile, so each of these must be run natively on its own OS):
 

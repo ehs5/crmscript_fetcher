@@ -5,7 +5,10 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('vue/dist', 'vue/dist'), ('tenant_settings.json', '.'), ('crmscript_fetcher.crmscript', '.'), ('pyproject.toml', '.')],
+    # vue/dist now lives under gui/ (ticket 06) - destination mirrors that so
+    # gui/main.py's Path(__file__).parent / "vue/dist/..." still resolves
+    # correctly against the frozen bundle's synthesized module path.
+    datas=[('gui/vue/dist', 'gui/vue/dist'), ('tenant_settings.json', '.'), ('crmscript_fetcher.crmscript', '.'), ('pyproject.toml', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -57,7 +60,10 @@ if sys.platform == 'win32':
     # macOS doesn't need this: main.py (the exe above) already dual-mode-dispatches on argv
     # within one binary, since macOS executables have no such subsystem split to work around.
     a_cli = Analysis(
-        ['cli.py'],
+        # cli.py split into the cli/ package (ticket 06) - cli/app.py still
+        # carries the `if __name__ == "__main__": main()` entry point cli.py
+        # used to.
+        ['cli/app.py'],
         pathex=[],
         binaries=[],
         # tenant_settings.json must ship here too: `crmfetch settings init` copies it out of

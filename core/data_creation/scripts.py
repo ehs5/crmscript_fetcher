@@ -1,7 +1,7 @@
-from utility import create_file
-from utility import create_json_file
-from utility import create_folder
-from utility import safe_name
+from core.utility import create_file
+from core.utility import create_json_file
+from core.utility import create_folder
+from core.utility import safe_name
 
 
 def create_scripts_in_folder(directory: str, folder_id: int, all_scripts: list[dict]) -> None:

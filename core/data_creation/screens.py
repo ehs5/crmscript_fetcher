@@ -1,7 +1,7 @@
-from utility import create_file
-from utility import create_json_file
-from utility import create_folder
-from utility import safe_name
+from core.utility import create_file
+from core.utility import create_json_file
+from core.utility import create_folder
+from core.utility import safe_name
 
 
 def create_screen_elements(screen_id: int, screen_path: str, screen_def_element: list[dict], item_config: list[dict]):

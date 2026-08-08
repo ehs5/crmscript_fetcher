@@ -1,6 +1,6 @@
-from utility import create_file
-from utility import create_json_file
-from utility import safe_name
+from core.utility import create_file
+from core.utility import create_json_file
+from core.utility import safe_name
 
 
 def create_trigger_files(triggers_directory: str, triggers: list[dict]) -> None:

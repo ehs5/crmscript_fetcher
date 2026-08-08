@@ -1,15 +1,15 @@
 """
 Unit tests for the crmfetch Cyclopts app.
 
-These invoke cli.app (or cli.main, which wraps it) directly and in-process -
-no subprocess - and monkeypatch the tenant_service/fetch_service singletons
-cli.py calls into. Per the spec's Testing Decisions, this is the CLI seam
-only: it confirms each command's flags map onto the correct core call with
-the correct arguments, not business-logic correctness (that's covered at the
-core seam in test_tenant_service.py / test_fetch_service.py).
+These invoke cli.app.app (or cli.main, which wraps it) directly and
+in-process - no subprocess - and monkeypatch the tenant_service/fetch_service
+singletons cli.tenant_commands calls into. Per the spec's Testing Decisions,
+this is the CLI seam only: it confirms each command's flags map onto the
+correct core call with the correct arguments, not business-logic correctness
+(that's covered at the core seam in test_tenant_service.py / test_fetch_service.py).
 
 The tenant_service fixture below bypasses cli's lazy pointer resolution
-entirely by pre-seeding cli.tenant_service with a Mock - see
+entirely by pre-seeding cli.tenant_commands.tenant_service with a Mock - see
 test_cli_settings.py for tests that exercise that resolution (the
 no-pointer-configured error path, and the real pointer -> real file path).
 """
@@ -19,23 +19,25 @@ from unittest.mock import Mock
 import pytest
 
 import cli
-import utility
-from tenant_service import TenantService
+import cli.app
+import cli.tenant_commands
+from core import utility
+from core.tenant_service import TenantService
 
 
 @pytest.fixture(autouse=True)
 def tenant_service(monkeypatch: pytest.MonkeyPatch) -> Mock:
-    """Replaces cli's module-level TenantService singleton with a spec'd Mock."""
+    """Replaces cli.tenant_commands' module-level TenantService singleton with a spec'd Mock."""
     service = Mock(spec=TenantService)
-    monkeypatch.setattr(cli, "tenant_service", service)
+    monkeypatch.setattr(cli.tenant_commands, "tenant_service", service)
     return service
 
 
 @pytest.fixture(autouse=True)
 def fetch_service(monkeypatch: pytest.MonkeyPatch) -> Mock:
-    """Replaces cli's FetchService singleton's fetch() with a Mock."""
-    service = Mock(spec=cli.fetch_service)
-    monkeypatch.setattr(cli, "fetch_service", service)
+    """Replaces cli.tenant_commands' FetchService singleton's fetch() with a Mock."""
+    service = Mock(spec=cli.tenant_commands.fetch_service)
+    monkeypatch.setattr(cli.tenant_commands, "fetch_service", service)
     return service
 
 
@@ -299,11 +301,11 @@ def test_show_unknown_id_exits_one(tenant_service: Mock) -> None:
 
 
 def test_main_remaps_bare_apps_usage_error_exit_code_to_two(tenant_service: Mock) -> None:
-    # cli.app on its own exits 1 on a parse error (Cyclopts' own default in
-    # this library version). cli.main - the actual console script entry
+    # cli.app.app on its own exits 1 on a parse error (Cyclopts' own default
+    # in this library version). cli.main - the actual console script entry
     # point - is what remaps that to exit code 2 for the CLI's contract.
     with pytest.raises(SystemExit) as bare_app_exit_info:
-        cli.app(["fetch"])
+        cli.app.app(["fetch"])
     assert bare_app_exit_info.value.code == 1
 
     exit_code: int = run(["fetch"])
