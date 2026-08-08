@@ -1,0 +1,117 @@
+name: Release
+
+# Builds and publishes CRMScript Fetcher on every version tag (vX.Y.Z).
+# PyInstaller can't cross-compile (see readme.md), so macOS and Windows each
+# build on their own real (GitHub-hosted) runner, in parallel, and both
+# upload their zip to the same draft release.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create draft release if it doesn't already exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" ||
+          gh release create "${{ github.ref_name }}" \
+            --repo "${{ github.repository }}" \
+            --draft \
+            --title "CRMScript Fetcher ${{ github.ref_name }}" \
+            --generate-notes
+
+  build-macos:
+    needs: create-release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+          cache-dependency-path: gui/vue/package-lock.json
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build Vue frontend
+        run: |
+          cd gui/vue
+          npm ci
+          npm run build
+
+      - name: Build macOS app
+        run: pyinstaller "CRMScript Fetcher.spec"
+
+      - name: Zip app bundle
+        run: |
+          cd dist
+          zip -r "CRMScript-Fetcher-macOS-${{ github.ref_name }}.zip" "CRMScript Fetcher.app"
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            "dist/CRMScript-Fetcher-macOS-${{ github.ref_name }}.zip" \
+            --repo "${{ github.repository }}" \
+            --clobber
+
+  build-windows:
+    needs: create-release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+          cache-dependency-path: gui/vue/package-lock.json
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build Vue frontend
+        run: |
+          cd gui/vue
+          npm ci
+          npm run build
+
+      - name: Build Windows executables
+        # Produces dist/CRMScript Fetcher/CRMScript Fetcher.exe (GUI) and
+        # crmfetch.exe (CLI) side by side - see CRMScript Fetcher.spec's
+        # sys.platform == 'win32' branch.
+        run: pyinstaller "CRMScript Fetcher.spec"
+
+      - name: Zip both executables
+        run: |
+          Compress-Archive -Path "dist\CRMScript Fetcher" -DestinationPath "dist\CRMScript-Fetcher-Windows-${{ github.ref_name }}.zip"
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.ref_name }}" `
+            "dist/CRMScript-Fetcher-Windows-${{ github.ref_name }}.zip" `
+            --repo "${{ github.repository }}" `
+            --clobber
