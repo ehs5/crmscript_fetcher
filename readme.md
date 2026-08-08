@@ -1,6 +1,6 @@
 # CRMScript Fetcher
 
-CRMScript Fetcher is a GUI tool that can download CRMScripts and other data from your 
+CRMScript Fetcher is a CLI + GUI tool that can download CRMScripts and other data from your 
 SuperOffice installations, and create the data as files within a 
 folder structure on your local PC.
 <img width="978" height="892" alt="image" src="https://github.com/user-attachments/assets/8c939f0b-8aca-4cf6-b976-a7660d66366a" />
@@ -63,25 +63,13 @@ errors. Usually this works itself out by running the fetch again.
 - A local PC running Windows
   - Tested on Windows 11 only.
 
-## Getting Started
-
-**GUI:**
+## Getting Started (GUI)
 
 1. Head over to Releases on the right-hand side and download the zip for your OS (macOS or Windows).
 
 2. Unpack it wherever you want.
 
-**CLI:**
-
-Requires [uv](https://docs.astral.sh/uv/).
-
-```bash
-uv tool install git+https://github.com/ehs5/crmscript_fetcher.git
-```
-
-Installs the `crmfetch` command, same on macOS and Windows.
-
-## How to use
+### How to use
 
 1. Run CRMScript Fetcher.exe
 
@@ -103,15 +91,35 @@ https://online.superoffice.com/CustXXXXX/CS
 
 6. Click Fetch CRMScripts to fetch!
 
-
 All your tenant settings will be saved locally in the tenant_settings.json file.
 
+## Getting Started (CLI)
+
+Using the CLI requires the Python package manager [uv](https://docs.astral.sh/uv/). Install that first if you don't have it already.
+
+Then run:
+
+```bash
+uv tool install git+https://github.com/ehs5/crmscript_fetcher.git
+```
+
+Verify it was installed correctly by running crmfetch in a new terminal window:
+
+
+```bash
+crmfetch
+```
+
+### How to use
+
+Begin with running **crmfetch --help** in your terminal. It will instruct you on what to do first. Most important is creating or pointing to an existing tenant_settings.json file on your machine.
+
+If you already have a tenant_settings.json file since you use to the GUI, you should point the CLI to that file.
 
 ## Quick Dev Guide
 
 ### Development
-The GUI runs on pywebview, which talks to Python in-process rather than over Eel's old
-local HTTP server. There's no separate dev-server hybrid anymore - to see your changes:
+The GUI is made in Vue, and the app uses pywebview to serve the Vue app and allow the Vue frontend talk to the Python code.
 
 1. From the `gui/vue` folder, run `npm run build`.
 2. Run `main.py` in your Python IDE (or `python main.py` from root). This opens the pywebview
@@ -137,8 +145,8 @@ This first builds the Vue frontend, then packages the Python GUI app. It creates
 
 This first builds the Vue frontend, then packages the Python GUI app. It creates **dist/CRMScript Fetcher.app**.
 
-Both builds are GUI-only - there's no bundled CLI executable. `crmfetch` is installed via `uv`
-instead (see Getting Started above), which builds it from source as part of the install.
+Both builds are GUI-only - there's no bundled CLI executable. See Getting Started (CLI) above for
+installing `crmfetch` via `uv` instead.
 
 ## Built With
 
