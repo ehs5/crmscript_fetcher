@@ -55,7 +55,11 @@ if sys.platform == 'win32':
         ['cli.py'],
         pathex=[],
         binaries=[],
-        datas=[('pyproject.toml', '.')],
+        # tenant_settings.json must ship here too: `crmfetch settings init` copies it out of
+        # get_app_directory() (sys._MEIPASS when frozen) as the default settings template.
+        # crmscript_fetcher.crmscript is correctly omitted - that's only used by bridge.py
+        # for the GUI, not by the CLI.
+        datas=[('pyproject.toml', '.'), ('tenant_settings.json', '.')],
         hiddenimports=[],
         hookspath=[],
         hooksconfig={},
