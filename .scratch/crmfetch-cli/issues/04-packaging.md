@@ -20,9 +20,9 @@ Update `readme.md`'s build instructions to reflect both new build commands/targe
 
 ## Acceptance Criteria
 
-- [ ] macOS: rebuilding produces one `.app` where running the bundled binary directly with no args opens the GUI, and with args (e.g. `... list`) runs the CLI and prints output to the calling terminal
-- [ ] Windows spec/build config updated to produce two distinct executables from one source tree; changes reviewed for correctness even if not run on an actual Windows machine (call this out explicitly in the report)
-- [ ] `readme.md` build instructions updated for both platforms, matching the actual commands used
-- [ ] `pyproject.toml` version bump convention (see prior `2.1.0` bump in git history) still works unchanged — `get_current_version()` still reads from the same place
-- [ ] `uv tool install` path from ticket 02 still works after any `pyproject.toml` packaging changes made in this ticket
-- [ ] Code follows the `coding-style` skill
+- [x] macOS: rebuilding produces one `.app` where running the bundled binary directly with no args opens the GUI, and with args (e.g. `... list`) runs the CLI and prints output to the calling terminal
+- [x] Windows spec/build config updated to produce two distinct executables from one source tree; changes reviewed for correctness even if not run on an actual Windows machine (call this out explicitly in the report)
+- [x] `readme.md` build instructions updated for both platforms, matching the actual commands used
+- [x] `pyproject.toml` version bump convention (see prior `2.1.0` bump in git history) still works unchanged — `get_current_version()` still reads from the same place
+- [x] `uv tool install` path from ticket 02 still works after any `pyproject.toml` packaging changes made in this ticket
+- [x] Code follows the `coding-style` skill
