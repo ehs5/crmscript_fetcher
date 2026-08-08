@@ -30,10 +30,8 @@ _LOGO = """
 # pyproject.toml, same as --version does.
 _VERSION_LINE = f"  v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher"
 
-# Shown on `crmfetch --help` (and any subcommand's --help) - the fuller
-# first-run guidance belongs here, not on the bare-invocation splash below,
-# so that just running `crmfetch` with no arguments stays short.
-BANNER = (
+# Shown on `crmfetch --help` (and any subcommand's --help)
+HELP_TEXT = (
     f"{_LOGO}\n\n"
     f"{_VERSION_LINE}\n\n"
     "  First run? Point crmfetch at a tenant_settings.json file before anything else:\n"
@@ -65,7 +63,7 @@ app = cyclopts.App(
     name="crmfetch",
     version=get_current_version,
     version_flags=["--version", "-v"],
-    help_prologue=BANNER,
+    help_prologue=HELP_TEXT,
     # Without this, cyclopts renders help_prologue as Markdown, which
     # collapses the banner's line breaks into one line.
     help_format="plaintext",
