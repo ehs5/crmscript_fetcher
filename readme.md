@@ -126,18 +126,20 @@ subsystem split, so one binary can do both.
 
 ```bash
 pyinstaller "CRMScript Fetcher.spec"
-pyinstaller crmfetch.spec
 ```
 
-This builds two separate executables into the same **dist/CRMScript Fetcher** folder:
+The same spec file builds two separate executables into one **dist/CRMScript Fetcher** folder on
+Windows (it branches on `sys.platform` internally):
 - `CRMScript Fetcher.exe` - GUI subsystem (`console=False`), unchanged double-click GUI experience.
 - `crmfetch.exe` - console subsystem (`console=True`), for use from PowerShell/cmd.
 
 Windows needs both because a GUI-subsystem `.exe` invoked with CLI arguments from a terminal has no
 attached console and silently drops all stdout/stderr - the same constraint Electron/Tauri apps hit
 (why VS Code ships a separate `code.cmd` shim), and the same reason Windows Python installs ship both
-`python.exe` and `pythonw.exe`. Run both `pyinstaller` commands (in either order) before zipping the
-folder for release - the two builds share one output folder so a single zip carries both executables.
+`python.exe` and `pythonw.exe`. Both executables come from a single `pyinstaller` invocation and a
+single `COLLECT` on purpose: PyInstaller's `COLLECT` fully owns and rebuilds its named output
+directory on every run, so two separate spec files/invocations both targeting `dist/CRMScript Fetcher`
+would clobber each other instead of coexisting.
 
 ## Built With
 
