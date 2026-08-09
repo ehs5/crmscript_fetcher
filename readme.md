@@ -64,7 +64,7 @@ errors. Usually this works itself out by running the fetch again.
 
 ### How to use
 
-1. Run CRMScript Fetcher.exe
+1. Run the CRMScript Fetcher.exe / CRMScript Fetcher.app
 
 2. Click the "Copy Fetcher Script" button.
 
