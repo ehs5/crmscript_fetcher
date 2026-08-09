@@ -328,7 +328,8 @@ def test_show_prints_human_readable_summary_by_default(tenant_service: Mock, cap
     assert exit_code == 0
     tenant_service.get_tenant_by_id.assert_called_once_with(5)
     out: str = capsys.readouterr().out
-    assert "5: Acme" in out
+    assert "ID: 5" in out
+    assert "Name: Acme" in out
     assert "https://acme.example" in out
 
 

@@ -43,7 +43,7 @@ def _tenant_detail(tenant: dict) -> str:
         ("Local directory", tenant["local_directory"]),
     ]
 
-    lines: list[str] = [f"{tenant['id']}: {tenant['tenant_name']}"]
+    lines: list[str] = [f"ID: {tenant['id']}", f"Name: {tenant['tenant_name']}"]
     for label, value in fields:
         lines.append(f"  {label + ':':<20}{value}")
 
