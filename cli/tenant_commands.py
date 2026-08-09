@@ -91,7 +91,7 @@ def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json
     tenants: list[dict] = service.get_all_tenants()
 
     if json_output:
-        print(json.dumps(tenants, indent=4))
+        print(json.dumps(tenants, indent=4, ensure_ascii=False))
         return 0
 
     for tenant in tenants:
@@ -117,7 +117,7 @@ def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Paramete
     tenants: list[dict] = service.search_tenants(query)
 
     if json_output:
-        print(json.dumps(tenants, indent=4))
+        print(json.dumps(tenants, indent=4, ensure_ascii=False))
         return 0
 
     for tenant in tenants:
@@ -148,7 +148,7 @@ def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Paramet
         return 1
 
     if json_output:
-        print(json.dumps(tenant, indent=4))
+        print(json.dumps(tenant, indent=4, ensure_ascii=False))
         return 0
 
     print(_tenant_detail(tenant))
