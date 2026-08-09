@@ -53,8 +53,8 @@ errors. Usually this works itself out by running the fetch again.
   - Only tested on Online so far, but should work on an "on premises" installation as well.
 
 
-- A local PC running Windows or macOs
-  - Tested on Windows 11 and macOs Tahoe only. 
+- A local PC running Windows or macOS
+  - Tested on Windows 11 and macOS Tahoe only. 
 
 ## Getting Started (GUI)
 
@@ -133,7 +133,7 @@ This first builds the Vue frontend, then packages the Python GUI app. It creates
 **macOS:**
 
 ```bash
-./build-macos.sh
+./build-macoS.sh
 ```
 
 This first builds the Vue frontend, then packages the Python GUI app. It creates **dist/CRMScript Fetcher.app**.
