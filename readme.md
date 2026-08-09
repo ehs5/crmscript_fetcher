@@ -4,6 +4,7 @@ CRMScript Fetcher is a CLI + GUI tool that can download CRMScripts and other dat
 SuperOffice installations, and create the data as files within a 
 folder structure on your local PC.
 <img width="978" height="892" alt="image" src="https://github.com/user-attachments/assets/8c939f0b-8aca-4cf6-b976-a7660d66366a" />
+<img width="1234" height="914" alt="image" src="docs/images/crmfetch-cli-splash.png" />
 
 ## About
 
@@ -116,14 +117,15 @@ Begin with running **crmfetch --help** in your terminal. It will instruct you on
 
 If you already have a tenant_settings.json file since you use to the GUI, you should point the CLI to that file.
 
-## Quick Dev Guide
+## Development
 
-### Development
-The GUI is made in Vue, and the app uses pywebview to serve the Vue app and allow the Vue frontend talk to the Python code.
+The app contains three part:
 
-1. From the `gui/vue` folder, run `npm run build`.
-2. Run `main.py` in your Python IDE (or `python main.py` from root). This opens the pywebview
-window against the freshly built `gui/vue/dist`.
+**core:** Python code that does the fetching and maintains tenant settings. Is used both by gui and cli.
+
+**gui:** The desktop app made in Vue The app uses pywebview to serve the Vue app and allow the Vue frontend talk to the Python code.
+
+**cli:** A CLI implementation made in Python.
 
 ### How to Build
 
