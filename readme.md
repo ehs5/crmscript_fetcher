@@ -5,7 +5,7 @@ SuperOffice installations, and create the data as files within a
 folder structure on your local PC.
 <img width="900" alt="image" src="https://github.com/user-attachments/assets/8c939f0b-8aca-4cf6-b976-a7660d66366a" />
 
-<img width="900" alt="image" src="docs/images/crmfetch-cli-splash.png" />
+<img width="600" alt="image" src="docs/images/crmfetch-cli-splash.png" />
 
 ## About
 
