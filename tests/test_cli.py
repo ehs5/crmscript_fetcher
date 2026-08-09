@@ -311,7 +311,28 @@ def test_version_shorthand_flag_matches_long_flag(capsys: pytest.CaptureFixture)
     assert capsys.readouterr().out.strip() == utility.get_current_version()
 
 
-def test_show_prints_full_tenant_as_json(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
+def test_show_prints_human_readable_summary_by_default(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
+    tenant: dict = {
+        "id": 5,
+        "tenant_name": "Acme",
+        "url": "https://acme.example",
+        "include_id": "acme-inc",
+        "key": "secret",
+        "local_directory": "/tmp/acme",
+        "fetch_options": {"fetch_scripts": True},
+    }
+    tenant_service.get_tenant_by_id.return_value = tenant
+
+    exit_code: int = run(["show", "5"])
+
+    assert exit_code == 0
+    tenant_service.get_tenant_by_id.assert_called_once_with(5)
+    out: str = capsys.readouterr().out
+    assert "5: Acme" in out
+    assert "https://acme.example" in out
+
+
+def test_show_prints_full_tenant_as_json_with_json_flag(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
     tenant: dict = {
         "id": 5,
         "tenant_name": "Acme",
@@ -322,7 +343,7 @@ def test_show_prints_full_tenant_as_json(tenant_service: Mock, capsys: pytest.Ca
     }
     tenant_service.get_tenant_by_id.return_value = tenant
 
-    exit_code: int = run(["show", "5"])
+    exit_code: int = run(["show", "5", "--json"])
 
     assert exit_code == 0
     tenant_service.get_tenant_by_id.assert_called_once_with(5)

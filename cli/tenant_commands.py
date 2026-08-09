@@ -34,6 +34,26 @@ def _tenant_summary(tenant: dict) -> str:
     return f"{tenant['id']}: {tenant['tenant_name']} ({tenant['url']})"
 
 
+def _tenant_detail(tenant: dict) -> str:
+    """Formats a tenant as a multi-line human-readable block for `show`."""
+    fields = [
+        ("URL", tenant["url"]),
+        ("Script include ID", tenant["include_id"]),
+        ("Script key", tenant["key"]),
+        ("Local directory", tenant["local_directory"]),
+    ]
+
+    lines: list[str] = [f"{tenant['id']}: {tenant['tenant_name']}"]
+    for label, value in fields:
+        lines.append(f"  {label + ':':<20}{value}")
+
+    lines.append("  Fetch options:")
+    for option, enabled in tenant["fetch_options"].items():
+        lines.append(f"    {option}: {enabled}")
+
+    return "\n".join(lines)
+
+
 def _resolve_tenant_service() -> TenantService | None:
     """
     Returns the module-level TenantService, resolving it from the CLI's
@@ -106,14 +126,16 @@ def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Paramete
 
 
 @app.command(name="show")
-def show_tenant(tenant_id: int) -> int:
-    """Prints the full JSON for one tenant.
+def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False) -> int:
+    """Prints one tenant's details.
 
     Parameters
     ----------
     tenant_id: int
         The tenant's numeric ID, e.g. crmfetch show 3. Run crmfetch list
         to see available IDs.
+    json_output: bool
+        Print the full tenant object as JSON instead of a human-readable summary.
     """
     service: TenantService | None = _resolve_tenant_service()
     if service is None:
@@ -125,7 +147,11 @@ def show_tenant(tenant_id: int) -> int:
         _print_error(str(e))
         return 1
 
-    print(json.dumps(tenant, indent=4))
+    if json_output:
+        print(json.dumps(tenant, indent=4))
+        return 0
+
+    print(_tenant_detail(tenant))
     return 0
 
 
