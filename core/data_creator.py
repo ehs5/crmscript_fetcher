@@ -1,5 +1,6 @@
 from core.utility import create_folder
 from core.utility import delete_folder
+from core.utility import log
 from core.utility import move_folder
 
 from core.data_creation.scripts import create_scripts_hierarchy
@@ -49,15 +50,15 @@ class DataCreator:
         scripts_directory: str = f"{self.tenant.get('local_directory')}/Scripts"
         triggers_directory: str = f"{self.tenant.get('local_directory')}/Triggers"
 
-        print("Trying to delete temp folder in case it was not deleted on previous fetch")
+        log("Trying to delete temp folder in case it was not deleted on previous fetch")
         delete_folder(temp_directory)
 
-        print("Creating temp folder and moving existing folders and scripts to folder")
+        log("Creating temp folder and moving existing folders and scripts to folder")
         create_folder(temp_directory)
         move_folder(scripts_directory, temp_directory)
         move_folder(triggers_directory, temp_directory)
 
-        print("Creating folders and files from JSON")
+        log("Creating folders and files from JSON")
         create_folder(scripts_directory)
         create_folder(triggers_directory)
 
@@ -66,7 +67,7 @@ class DataCreator:
         create_scripts_hierarchy(scripts_directory, group_scripts)
         create_trigger_files(triggers_directory, self.data["triggers"])
 
-        print("Deleting temp folder")
+        log("Deleting temp folder")
         delete_folder(temp_directory)
 
     def creator_v2(self) -> None:
@@ -79,10 +80,10 @@ class DataCreator:
         scheduled_tasks_directory: str = f"{self.tenant['local_directory']}/Scheduled tasks"
         tables_directory: str = f"{self.tenant['local_directory']}/Tables"
 
-        print("Trying to delete temp folder in case it was not deleted on previous fetch")
+        log("Trying to delete temp folder in case it was not deleted on previous fetch")
         delete_folder(temp_directory)
 
-        print("Creating temp folder and moving existing folders and scripts to folder")
+        log("Creating temp folder and moving existing folders and scripts to folder")
         create_folder(temp_directory)
         move_folder(scripts_directory, temp_directory)
         move_folder(triggers_directory, temp_directory)
@@ -91,7 +92,7 @@ class DataCreator:
         move_folder(scheduled_tasks_directory, temp_directory)
         move_folder(tables_directory, temp_directory)
 
-        print("Creating folders and files from JSON")
+        log("Creating folders and files from JSON")
         if self.tenant["fetch_options"]["fetch_scripts"]:
             create_folder(scripts_directory)
             create_scripts_hierarchy(scripts_directory, self.data["group_scripts"])
@@ -117,5 +118,5 @@ class DataCreator:
             create_folder(tables_directory)
             create_table_hierarchy(tables_directory, self.data["group_extra_tables"])
 
-        print("Deleting temp folder")
+        log("Deleting temp folder")
         delete_folder(temp_directory)

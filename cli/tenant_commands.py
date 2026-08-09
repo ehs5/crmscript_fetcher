@@ -8,11 +8,13 @@ from pathlib import Path
 from typing import Annotated
 
 import cyclopts
+from rich.console import Console
 
 from cli.app import app, _print_error
 from cli.cli_config import CliConfig
 from core.fetch_service import FetchService
 from core.tenant_service import TenantService
+from core.utility import set_verbose
 
 _NO_SETTINGS_MESSAGE = (
     "No active tenant_settings.json is configured. "
@@ -43,7 +45,10 @@ def _tenant_detail(tenant: dict) -> str:
         ("Local directory", tenant["local_directory"]),
     ]
 
-    lines: list[str] = [f"ID: {tenant['id']}", f"Name: {tenant['tenant_name']}"]
+    lines: list[str] = [
+        f"{'ID:':<6}{tenant['id']}",
+        f"{'Name:':<6}{tenant['tenant_name']}",
+    ]
     for label, value in fields:
         lines.append(f"  {label + ':':<20}{value}")
 
@@ -156,7 +161,7 @@ def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Paramet
 
 
 @app.command(name="fetch")
-def fetch_tenant(tenant_id: int) -> int:
+def fetch_tenant(tenant_id: int, *, verbose: bool = False) -> int:
     """Fetches from the given tenant ID into its specified directory.
 
     Parameters
@@ -164,6 +169,8 @@ def fetch_tenant(tenant_id: int) -> int:
     tenant_id: int
         The tenant's numeric ID, e.g. crmfetch fetch 3. Run crmfetch list
         to see available IDs.
+    verbose: bool
+        Print every file/folder as it's created instead of a quiet spinner.
     """
     service: TenantService | None = _resolve_tenant_service()
     if service is None:
@@ -175,7 +182,15 @@ def fetch_tenant(tenant_id: int) -> int:
         _print_error(str(e))
         return 1
 
-    result: dict = fetch_service.fetch(tenant)
+    set_verbose(verbose)
+
+    # A spinner would just get interleaved with --verbose's own file-by-file
+    # output, so it's quiet-mode only - the thing it's replacing.
+    if verbose:
+        result: dict = fetch_service.fetch(tenant)
+    else:
+        with Console().status(f"Fetching {tenant['tenant_name']}..."):
+            result: dict = fetch_service.fetch(tenant)
 
     if not result["success"]:
         _print_error(result["error"])
@@ -184,7 +199,7 @@ def fetch_tenant(tenant_id: int) -> int:
     if result["info"]:
         print(result["info"])
 
-    print(f"Fetched tenant {tenant_id} successfully.")
+    print(f"Fetched {tenant['tenant_name']} successfully.")
     return 0
 
 

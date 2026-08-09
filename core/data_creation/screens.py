@@ -1,6 +1,7 @@
 from core.utility import create_file
 from core.utility import create_json_file
 from core.utility import create_folder
+from core.utility import log
 from core.utility import safe_name
 
 
@@ -27,7 +28,7 @@ def create_screen_folders(directory: str, folder_id: int, group_screens: dict) -
     for screen in [sd for sd in screen_defs if sd.get("hierarchy_id") == folder_id]:
         folder_name: str = safe_name(f"(Screen) {screen.get('name')}")
         screen_path: str = f"{directory}/{folder_name}"
-        print(f"Creating folder: {folder_name}")
+        log(f"Creating folder: {folder_name}")
         create_folder(screen_path)
 
         # Create one .crmscript file for each of the loading scripts

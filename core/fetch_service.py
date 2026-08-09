@@ -2,6 +2,7 @@ import json
 import requests
 from requests import Response
 from core.data_creator import DataCreator
+from core.utility import log
 
 CURRENT_CRMSCRIPT_VERSION = 2
 
@@ -32,7 +33,7 @@ class FetchService:
         Returns tuple of (data, error_message).
         """
         script_url = self.build_script_url(tenant)
-        print(f"Getting JSON data from SuperOffice using endpoint: {script_url}")
+        log(f"Getting JSON data from SuperOffice using endpoint: {script_url}")
 
         try:
             # Do GET request to Superoffice
@@ -59,7 +60,7 @@ class FetchService:
         # Parse JSON and return data as dictionary from method
         try:
             data: dict = json.loads(response.text)
-            print("JSON fetched!")
+            log("JSON fetched!")
             return data, ""
         except json.JSONDecodeError as e:
             error: str = (f"Invalid JSON response from server\n\nContacting URL: {script_url}\n\n"

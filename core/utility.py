@@ -112,13 +112,31 @@ def safe_name(text: str) -> str:
     return text
 
 
+# Off by default - a fetch creates/deletes hundreds of files, and printing
+# every single one is too noisy for normal use. The CLI's --verbose flag
+# (and nothing else) flips this on for the duration of a fetch.
+_verbose: bool = False
+
+
+def set_verbose(verbose: bool) -> None:
+    """Enables or disables the create/delete folder and file logging below."""
+    global _verbose
+    _verbose = verbose
+
+
+def log(message: str) -> None:
+    """Prints message only when verbose mode is enabled via set_verbose()."""
+    if _verbose:
+        print(message)
+
+
 def create_folder(path: str) -> None:
     try:
         os.mkdir(path)
     except OSError:
-        print(f"Creation of the directory failed. Folder might already exist: {path}")
+        log(f"Creation of the directory failed. Folder might already exist: {path}")
     else:
-        print(f"Successfully created directory: {path}")
+        log(f"Successfully created directory: {path}")
 
 
 # Sometimes throws PermissionError if os module has recently accessed the folder.
@@ -141,13 +159,13 @@ def delete_folder(directory: str) -> None:
     if not os.path.isdir(directory):
         return
 
-    print(f"Deleting folder: {directory}")
+    log(f"Deleting folder: {directory}")
     shutil.rmtree(directory)
 
 
 def create_file(directory: str, file_name: str, body: str) -> None:
     """Creates a file in the given directory. file_name must include file extension."""
-    print(f"Creating file: {file_name}")
+    log(f"Creating file: {file_name}")
     full_path: str = f"{directory}/{file_name}"
     
     """ Normalize newlines """
@@ -161,7 +179,7 @@ def create_file(directory: str, file_name: str, body: str) -> None:
 
 def create_json_file(directory: str, file_name: str, content: Any) -> None:
     """Creates a JSON file in the given directory. file_name must include file extension."""
-    print(f"Creating file: {file_name}")
+    log(f"Creating file: {file_name}")
     full_path: str = f"{directory}/{file_name}"
     with open(full_path, "w", encoding="utf8") as f:
         json.dump(content, f, indent=4, ensure_ascii=False)
