@@ -3,8 +3,9 @@
 CRMScript Fetcher is a CLI + GUI tool that can download CRMScripts and other data from your 
 SuperOffice installations, and create the data as files within a 
 folder structure on your local PC.
-<img width="978" height="892" alt="image" src="https://github.com/user-attachments/assets/8c939f0b-8aca-4cf6-b976-a7660d66366a" />
-<img width="1234" height="914" alt="image" src="docs/images/crmfetch-cli-splash.png" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/8c939f0b-8aca-4cf6-b976-a7660d66366a" />
+
+<img width="900" alt="image" src="docs/images/crmfetch-cli-splash.png" />
 
 ## About
 
@@ -26,11 +27,6 @@ Metadata will be created as .json files.
 
 CRMScript Fetcher aims to recreate the same folder structure as you see in SuperOffice, as far as possible.
 
-## Important to know
-
-The software is provided "as is" without warranty of any kind. 
-All responsibility of the usage of CRMScript Fetcher lies on you.
-
 > :warning: **When fetching, all files and folders within the folders
 > Scripts, Triggers, Screens, ScreenChoosers, Scheduled tasks and Tables
 > WILL be deleted if they are not present in SuperOffice.**
@@ -40,10 +36,6 @@ All responsibility of the usage of CRMScript Fetcher lies on you.
 > advisable to put anything there manually.
 > 
 > However, files/folders within the root directory will not be deleted, so you can put stuff there safely.
-
-Technically, all files and folders within the created folders will be deleted and recreated
-every time you click fetch, even if you have done no changes in SuperOffice.  
-It is up to you to consider if this poses any problems for your usage. 
 
 #### About the temp backup folder
 Each fetch will create a "temp" folder where your current fetcher-created folders are moved into,
@@ -61,8 +53,8 @@ errors. Usually this works itself out by running the fetch again.
   - Only tested on Online so far, but should work on an "on premises" installation as well.
 
 
-- A local PC running Windows
-  - Tested on Windows 11 only.
+- A local PC running Windows or macOs
+  - Tested on Windows 11 and macOs Tahoe only. 
 
 ## Getting Started (GUI)
 
@@ -75,7 +67,6 @@ errors. Usually this works itself out by running the fetch again.
 1. Run CRMScript Fetcher.exe
 
 2. Click the "Copy Fetcher Script" button.
-Alternatively, open "CRMScript Fetcher.crmscript" in a text editor, and copy the contents from there.
 
 3. In your SuperOffice installation, create a new script and paste the contents.
 Give it an "include name" (e.g. "crmscript-fetcher") and a secret key.
