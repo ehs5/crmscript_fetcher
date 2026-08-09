@@ -30,10 +30,11 @@ _LOGO = """
 # pyproject.toml, same as --version does.
 _VERSION_LINE = f"  v{get_current_version()} - https://github.com/ehs5/crmscript_fetcher"
 
-# Shown on `crmfetch --help` (and any subcommand's --help)
+# Shown on `crmfetch --help` (and any subcommand's --help) - no logo/version
+# here on purpose, unlike the bare-invocation splash below: --help is the
+# page you land on to actually get unblocked, so it starts straight at the
+# first-run guidance instead of making you scroll past the banner again.
 HELP_TEXT = (
-    f"{_LOGO}\n\n"
-    f"{_VERSION_LINE}\n\n"
     "  First run? Point crmfetch at a tenant_settings.json file before anything else:\n"
     "  - If the CRMScript Fetcher GUI is already installed, find its\n"
     "    tenant_settings.json and run: crmfetch settings set <path>\n"
