@@ -46,8 +46,8 @@ def _tenant_detail(tenant: dict) -> str:
     ]
 
     lines: list[str] = [
-        f"{'ID:':<6}{tenant['id']}",
-        f"{'Name:':<6}{tenant['tenant_name']}",
+        f"{'ID':<4} : {tenant['id']}",
+        f"{'Name':<4} : {tenant['tenant_name']}",
     ]
     for label, value in fields:
         lines.append(f"  {label + ':':<20}{value}")

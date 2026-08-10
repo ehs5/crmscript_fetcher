@@ -7,8 +7,8 @@ for the full command surface and the decisions behind it.
 
 This module owns the cyclopts App itself, the splash/help banner, and the
 main() entry point. The actual commands are registered onto `app` by
-cli.tenant_commands and cli.settings_commands, imported at the bottom of this
-file for their registration side effects.
+cli.tenant_commands, cli.settings_commands, and cli.script_commands,
+imported at the bottom of this file for their registration side effects.
 """
 import sys
 
@@ -98,12 +98,16 @@ def _print_error(message: str) -> None:
 # Imported for their registration side effects (each decorates commands onto
 # `app` above) - must happen after `app`/`_print_error` are defined, since
 # both modules import them back from here.
-from cli import tenant_commands, settings_commands  # noqa: E402,F401
+from cli import tenant_commands, settings_commands, script_commands  # noqa: E402,F401
 
 # Cyclopts sorts commands alphabetically by default; this pins an explicit
-# order instead (show sits with the other tenant-lookup commands, right
-# after fetch, rather than alphabetically after list).
-for _sort_key, _command_name in enumerate(["add", "delete", "edit", "fetch", "show", "list", "search", "settings"]):
+# order instead - script leads since pasting it into SuperOffice is the
+# actual first step, before there's anything to add/fetch, and show sits
+# with the other tenant-lookup commands, right after fetch, rather than
+# alphabetically after list.
+for _sort_key, _command_name in enumerate(
+    ["script", "add", "delete", "edit", "fetch", "show", "list", "search", "settings"]
+):
     app[_command_name].sort_key = _sort_key
     # help_prologue would otherwise be inherited from app onto every
     # subcommand's own --help too - fine for `crmfetch -h` itself, but the

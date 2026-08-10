@@ -297,6 +297,13 @@ def test_delete_with_yes_calls_delete_tenant_and_exits_zero(tenant_service: Mock
     tenant_service.delete_tenant.assert_called_once_with(5)
 
 
+def test_script_prints_fetcher_script(capsys: pytest.CaptureFixture) -> None:
+    exit_code: int = run(["script"])
+
+    assert exit_code == 0
+    assert capsys.readouterr().out.strip() == utility.get_fetcher_script().strip()
+
+
 def test_version_matches_pyproject_toml(capsys: pytest.CaptureFixture) -> None:
     exit_code: int = run(["--version"])
 
@@ -328,8 +335,8 @@ def test_show_prints_human_readable_summary_by_default(tenant_service: Mock, cap
     assert exit_code == 0
     tenant_service.get_tenant_by_id.assert_called_once_with(5)
     out: str = capsys.readouterr().out
-    assert "ID:   5" in out
-    assert "Name: Acme" in out
+    assert "ID   : 5" in out
+    assert "Name : Acme" in out
     assert "https://acme.example" in out
 
 
