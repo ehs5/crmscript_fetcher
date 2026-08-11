@@ -101,12 +101,11 @@ def _print_error(message: str) -> None:
 from cli import tenant_commands, settings_commands, script_commands  # noqa: E402,F401
 
 # Cyclopts sorts commands alphabetically by default; this pins an explicit
-# order instead - script leads since pasting it into SuperOffice is the
-# actual first step, before there's anything to add/fetch, and show sits
-# with the other tenant-lookup commands, right after fetch, rather than
-# alphabetically after list.
+# order instead - show sits with the other tenant-lookup commands, right
+# after fetch, rather than alphabetically after list, and script sits near
+# the bottom, right before settings.
 for _sort_key, _command_name in enumerate(
-    ["script", "add", "delete", "edit", "fetch", "show", "list", "search", "settings"]
+    ["add", "delete", "edit", "fetch", "show", "list", "search", "script", "settings"]
 ):
     app[_command_name].sort_key = _sort_key
     # help_prologue would otherwise be inherited from app onto every
