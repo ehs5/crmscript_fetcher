@@ -39,19 +39,18 @@ def _tenant_summary(tenant: dict) -> str:
 def _tenant_detail(tenant: dict) -> str:
     """Formats a tenant as a multi-line human-readable block for `show`."""
     fields = [
+        ("ID", tenant["id"]),
+        ("Name", tenant["tenant_name"]),
         ("URL", tenant["url"]),
         ("Script include ID", tenant["include_id"]),
         ("Script key", tenant["key"]),
         ("Local directory", tenant["local_directory"]),
     ]
+    # +1 for the colon, so every row - including ID/Name - shares one column
+    # width and one label/colon/value layout instead of two different ones.
+    width = max(len(label) for label, _ in fields) + 1
 
-    lines: list[str] = [
-        f"  {'ID':<4} : {tenant['id']}",
-        f"  {'Name':<4} : {tenant['tenant_name']}",
-    ]
-    for label, value in fields:
-        lines.append(f"  {label + ':':<20}{value}")
-
+    lines: list[str] = [f"  {(label + ':'):<{width}} {value}" for label, value in fields]
     lines.append("  Fetch options:")
     for option, enabled in tenant["fetch_options"].items():
         lines.append(f"    {option}: {enabled}")
