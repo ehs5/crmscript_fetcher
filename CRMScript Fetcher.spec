@@ -59,5 +59,11 @@ app = BUNDLE(
     coll,
     name='CRMScript Fetcher.app',
     icon='icon.icns',
-    bundle_identifier=None,
+    # bundle_identifier=None (the previous value) makes PyInstaller fall back
+    # to the literal app name as the CFBundleIdentifier - "CRMScript Fetcher",
+    # spaces and all, which isn't a valid reverse-DNS identifier. Without a
+    # real one, macOS's Launch Services can't give the app a stable identity
+    # of its own, which is why it was showing up grouped under Chrome in the
+    # Dock instead of as its own app.
+    bundle_identifier='com.espensteen.crmscriptfetcher',
 )

@@ -9,7 +9,12 @@
     </el-header>
     <el-container>
       <!-- Left side tenant list-->
-      <el-aside id="aside">
+      <!-- Element Plus's el-aside is fixed at 300px wide by default (flex-shrink:
+      0, width: var(--el-aside-width, 300px)) - our own min-width:25% below never
+      actually applies at this window size, since 25% of ~900px is still under
+      300px. 300px wasn't quite enough room for the New/Copy Fetcher Script
+      buttons, forcing a horizontal scrollbar - width overrides that variable. -->
+      <el-aside id="aside" width="320px">
         <el-container direction="vertical" class="aside-content">
           <div class="tenant-list">
             <el-row>
