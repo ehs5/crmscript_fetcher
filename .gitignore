@@ -3,3 +3,4 @@ Icon mockups/
 dist/
 __pycache__
 core/data_creation/__pycache__
+.venv/
