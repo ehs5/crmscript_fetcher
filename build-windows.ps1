@@ -18,12 +18,16 @@ function Invoke-Checked {
 # just prints a "not found, install from Store" message and exits non-zero.
 # Presence on PATH doesn't prove it works, so probe each candidate by actually
 # running it. `py` (the official launcher installed by python.org) is tried
-# first since it's immune to that alias shadowing.
+# last: on CI (actions/setup-python), `python`/`python3` are the pinned
+# version and always real - `py -3` is a separate, pre-baked system install
+# that silently overrides the pinned version if tried first, which is what
+# broke the v3.0.0 Windows release build (pyinstaller pinned below couldn't
+# satisfy whatever newer Python `py -3` resolved to on the runner).
 function Get-PythonCommand {
     $candidates = @(
-        @{ Exe = "py"; PreArgs = @("-3") },
         @{ Exe = "python"; PreArgs = @() },
-        @{ Exe = "python3"; PreArgs = @() }
+        @{ Exe = "python3"; PreArgs = @() },
+        @{ Exe = "py"; PreArgs = @("-3") }
     )
     foreach ($c in $candidates) {
         if (-not (Get-Command $c.Exe -ErrorAction SilentlyContinue)) {
