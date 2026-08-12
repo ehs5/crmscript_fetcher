@@ -9,9 +9,39 @@ license = {text = "MIT license"}
 readme = "readme.md"
 requires-python = ">=3.10"
 dependencies = [
+    "cyclopts~=4.22",
+    "platformdirs~=4.3",
+    "requests~=2.27.1",
+    "rich~=15.0",
+    "tenacity~=8.1.0",
+    "toml~=0.10.2",
 ]
 
+[project.scripts]
+crmfetch = "cli:main"
+
+# The CLI-only install ships the core/ + cli/ packages - gui/ (the
+# pywebview-launching code, bridge.py, and the bundled vue/ frontend) is left
+# out on purpose, same as main.py at root (the GUI/CLI dispatcher).
+[tool.poetry]
+packages = [
+    { include = "core" },
+    { include = "cli" },
+]
+include = [
+    # get_current_version()/TenantService/get_fetcher_script() all resolve
+    # paths relative to core/utility.py's app directory (one level up from
+    # core/), so these three must ship alongside it. Plain string includes
+    # default to sdist-only - force wheel too.
+    { path = "pyproject.toml", format = ["sdist", "wheel"] },
+    { path = "tenant_settings.json", format = ["sdist", "wheel"] },
+    { path = "crmscript_fetcher.crmscript", format = ["sdist", "wheel"] },
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
