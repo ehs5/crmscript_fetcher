@@ -167,11 +167,6 @@ def create_file(directory: str, file_name: str, body: str) -> None:
     """Creates a file in the given directory. file_name must include file extension."""
     log(f"Creating file: {file_name}")
     full_path: str = f"{directory}/{file_name}"
-    
-    """ Normalize newlines """
-    # TODO: What to do here? This fix caused every line to be two linebreaks, in Windows at least
-    # body = body.replace("\r\n", "\n")
-    # body = body.replace("\n", "\r\n")
 
     with open(full_path, "w", encoding="utf-8") as f:
         f.write(body)
