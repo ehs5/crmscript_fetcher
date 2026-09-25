@@ -22,6 +22,7 @@ import cli
 import cli.app
 import cli.tenant_commands
 from core import utility
+from core.fetch_service import DEFAULT_USER_AGENT
 from core.tenant_service import TenantService
 
 
@@ -127,7 +128,37 @@ def test_fetch_calls_get_tenant_by_id_then_fetches_that_tenant(
 
     assert exit_code == 0
     tenant_service.get_tenant_by_id.assert_called_once_with(5)
-    fetch_service.fetch.assert_called_once_with(tenant)
+    fetch_service.fetch.assert_called_once_with(
+        tenant, ignore_ssl_certificate_error=False, user_agent=DEFAULT_USER_AGENT
+    )
+
+
+def test_fetch_ignore_ssl_certificate_error_flag_is_passed_to_fetch(
+    tenant_service: Mock, fetch_service: Mock
+) -> None:
+    tenant: dict = {"id": 5, "tenant_name": "Acme", "url": "https://acme.example"}
+    tenant_service.get_tenant_by_id.return_value = tenant
+    fetch_service.fetch.return_value = {"success": True, "validation_error": False, "error": "", "info": ""}
+
+    exit_code: int = run(["fetch", "5", "--ignore-ssl-certificate-error"])
+
+    assert exit_code == 0
+    fetch_service.fetch.assert_called_once_with(
+        tenant, ignore_ssl_certificate_error=True, user_agent=DEFAULT_USER_AGENT
+    )
+
+
+def test_fetch_useragent_flag_is_passed_to_fetch(tenant_service: Mock, fetch_service: Mock) -> None:
+    tenant: dict = {"id": 5, "tenant_name": "Acme", "url": "https://acme.example"}
+    tenant_service.get_tenant_by_id.return_value = tenant
+    fetch_service.fetch.return_value = {"success": True, "validation_error": False, "error": "", "info": ""}
+
+    exit_code: int = run(["fetch", "5", "--useragent", "foobar"])
+
+    assert exit_code == 0
+    fetch_service.fetch.assert_called_once_with(
+        tenant, ignore_ssl_certificate_error=False, user_agent="foobar"
+    )
 
 
 def test_fetch_prints_error_and_exits_one_on_fetch_failure(

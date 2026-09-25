@@ -1,10 +1,12 @@
 import json
 import requests
+import urllib3
 from requests import Response
 from core.data_creator import DataCreator
-from core.utility import log
+from core.utility import get_current_version, log
 
 CURRENT_CRMSCRIPT_VERSION = 2
+DEFAULT_USER_AGENT = f"crmfetch/{get_current_version()}"
 
 class FetchService:
     """
@@ -27,19 +29,37 @@ class FetchService:
 
         return script_url
 
-    def get_superoffice_data(self, tenant: dict) -> tuple[dict | None, str]:
+    def get_superoffice_data(self, tenant: dict, ignore_ssl_certificate_error: bool = False,
+                             user_agent: str = DEFAULT_USER_AGENT) -> tuple[dict | None, str]:
         """
         Fetches JSON data from SuperOffice.
         Returns tuple of (data, error_message).
+        If ignore_ssl_certificate_error is True, the server's HTTPS certificate is not verified.
+        user_agent is sent as the request's User-Agent header.
         """
         script_url = self.build_script_url(tenant)
         log(f"Getting JSON data from SuperOffice using endpoint: {script_url}")
 
+        if ignore_ssl_certificate_error:
+            log("Warning: Ignoring SSL certificate errors for this request")
+            # The user explicitly opted out of verification, so don't also spam urllib3's warning
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         try:
             # Do GET request to Superoffice
-            response: Response = requests.get(script_url)
+            response: Response = requests.get(
+                script_url,
+                headers={"User-Agent": user_agent},
+                verify=not ignore_ssl_certificate_error,
+            )
             response.raise_for_status()  # Raises exception for any bad HTTP status
 
+        # SSLError is a subclass of ConnectionError, so it must be caught first
+        except requests.exceptions.SSLError as e:
+            error = (f"SSL certificate verification failed: {str(e)}\n\n"
+                     f"If you trust this server, you can retry with: crmfetch fetch <id> --ignore-ssl-certificate-error")
+            print(error)
+            return None, error
         except requests.ConnectionError as e:
             error = f"Failed to connect to SuperOffice: {str(e)}"
             print(error)
@@ -98,9 +118,12 @@ class FetchService:
 
         return ""
 
-    def fetch(self, tenant) -> dict:
+    def fetch(self, tenant, ignore_ssl_certificate_error: bool = False,
+              user_agent: str = DEFAULT_USER_AGENT) -> dict:
         """
         Main entry point for fetching data from SuperOffice for a specific tenant.
+        If ignore_ssl_certificate_error is True, the server's HTTPS certificate is not verified.
+        user_agent is sent as the request's User-Agent header.
         """
 
         # The result that is returned to frontend
@@ -122,7 +145,7 @@ class FetchService:
             # Fetch data from SuperOffice
             data: dict | None
             error: str
-            data, error = self.get_superoffice_data(tenant)
+            data, error = self.get_superoffice_data(tenant, ignore_ssl_certificate_error, user_agent)
 
             if error:
                 result["error"] = error
