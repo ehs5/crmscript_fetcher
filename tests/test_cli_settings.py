@@ -170,6 +170,22 @@ def test_settings_init_does_not_overwrite_an_existing_backup(tmp_path: Path) -> 
     assert json.loads(second_backup.read_text())[0]["tenant_name"] == "Second backup target"
 
 
+def test_settings_init_refuses_a_directory_and_leaves_it_untouched(
+    tmp_path: Path, isolated_config_dir: Path, capsys: pytest.CaptureFixture
+) -> None:
+    directory: Path = tmp_path / "git"
+    directory.mkdir()
+    (directory / "keep.txt").write_text("keep me")
+
+    exit_code: int = run(["settings", "init", str(directory)])
+
+    assert exit_code == 1
+    assert "is a directory" in capsys.readouterr().err
+    assert (directory / "keep.txt").read_text() == "keep me"
+    assert not (tmp_path / "git.backup.json").exists()
+    assert not (isolated_config_dir / "crmfetch" / "config.json").exists()
+
+
 def test_once_pointer_set_list_reads_the_configured_tmp_file(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
     settings_path: Path = tmp_path / "tenant_settings.json"
     settings_path.write_text(json.dumps([{"id": 7, "tenant_name": "FromTmpFile", "url": "https://tmp.example"}]))

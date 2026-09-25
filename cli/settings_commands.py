@@ -78,7 +78,8 @@ def settings_init(path: str) -> int:
 
     If something already exists at path, it's backed up first (renamed to
     <path-without-extension>.backup.json, or .backup-2.json etc. if that name
-    is taken) rather than overwritten silently.
+    is taken) rather than overwritten silently. A directory is never backed
+    up this way - init refuses instead.
 
     Parameters
     ----------
@@ -86,6 +87,15 @@ def settings_init(path: str) -> int:
         Where to create the fresh default settings file.
     """
     settings_path: Path = Path(path).resolve()
+
+    # Without this, e.g. `crmfetch settings init .` would rename the whole
+    # current directory to <dir>.backup.json via the backup step below.
+    if settings_path.is_dir():
+        _print_error(
+            f"{settings_path} is a directory, not a file. Pass the settings file path instead, "
+            f"e.g. crmfetch settings init {settings_path / 'tenant_settings.json'}"
+        )
+        return 1
 
     if settings_path.exists():
         backup_path: Path = _next_backup_path(settings_path)
