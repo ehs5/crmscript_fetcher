@@ -3,13 +3,11 @@ import os
 import sys
 import toml
 import json
-import tkinter
 import shutil
 import platform
 import subprocess
 from typing import Any
 from pathlib import Path
-from tkinter import filedialog
 from tenacity import retry
 from tenacity import wait_fixed
 from tenacity import stop_after_attempt
@@ -53,7 +51,12 @@ def ask_directory_path_macos() -> str:
 def ask_directory_path_tk() -> str:
     """
     Used for Windows and Linux.
+    Tkinter is imported here rather than at module level so the CLI, which
+    imports other helpers from this module, works on Pythons without Tk.
     """
+    import tkinter
+    from tkinter import filedialog
+
     root = tkinter.Tk()
     root.withdraw()                   # Hide the root window
     root.attributes('-topmost', True) # Appear on top of browser window
