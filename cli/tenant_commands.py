@@ -12,7 +12,7 @@ from rich.console import Console
 
 from cli.app import app, _print_error
 from cli.cli_config import CliConfig
-from core.fetch_service import FetchService
+from core.fetch_service import DEFAULT_USER_AGENT, FetchService
 from core.tenant_service import TenantService
 from core.utility import set_verbose
 
@@ -160,7 +160,13 @@ def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Paramet
 
 
 @app.command(name="fetch")
-def fetch_tenant(tenant_id: int, *, verbose: bool = False) -> int:
+def fetch_tenant(
+    tenant_id: int,
+    *,
+    verbose: bool = False,
+    ignore_ssl_certificate_error: bool = False,
+    user_agent: Annotated[str, cyclopts.Parameter(name="--useragent")] = DEFAULT_USER_AGENT,
+) -> int:
     """Fetches from the given tenant ID into its specified directory.
 
     Parameters
@@ -170,6 +176,11 @@ def fetch_tenant(tenant_id: int, *, verbose: bool = False) -> int:
         to see available IDs.
     verbose: bool
         Print every file/folder as it's created instead of a quiet spinner.
+    ignore_ssl_certificate_error: bool
+        Skip HTTPS certificate verification, e.g. for a tenant with a
+        self-signed or expired certificate. Only use this for servers you trust.
+    user_agent: str
+        User-Agent header sent to SuperOffice, e.g. crmfetch fetch 3 --useragent foobar.
     """
     service: TenantService | None = _resolve_tenant_service()
     if service is None:
@@ -186,10 +197,14 @@ def fetch_tenant(tenant_id: int, *, verbose: bool = False) -> int:
     # A spinner would just get interleaved with --verbose's own file-by-file
     # output, so it's quiet-mode only - the thing it's replacing.
     if verbose:
-        result: dict = fetch_service.fetch(tenant)
+        result: dict = fetch_service.fetch(
+            tenant, ignore_ssl_certificate_error=ignore_ssl_certificate_error, user_agent=user_agent
+        )
     else:
         with Console().status(f"Fetching {tenant['tenant_name']}..."):
-            result: dict = fetch_service.fetch(tenant)
+            result: dict = fetch_service.fetch(
+                tenant, ignore_ssl_certificate_error=ignore_ssl_certificate_error, user_agent=user_agent
+            )
 
     if not result["success"]:
         _print_error(result["error"])

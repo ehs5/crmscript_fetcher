@@ -13,6 +13,7 @@ import pytest
 import requests
 
 from core.fetch_service import FetchService
+from core.utility import get_current_version
 
 
 @pytest.fixture
@@ -52,7 +53,7 @@ def test_fetch_success(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
         "script_version": 2,
         "group_scripts": {"script_folders": [], "scripts": []},
     }
-    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url, **kwargs: mock_response(json.dumps(payload)))
 
     result: dict = FetchService().fetch(tenant)
 
@@ -62,7 +63,7 @@ def test_fetch_success(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
 def test_fetch_success_flags_outdated_script_version(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
     # No script_version key -> defaults to v1, which is older than CURRENT_CRMSCRIPT_VERSION.
     payload: dict = {"script_folders": [], "scripts": [], "triggers": []}
-    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url, **kwargs: mock_response(json.dumps(payload)))
 
     result: dict = FetchService().fetch(tenant)
 
@@ -93,7 +94,7 @@ def test_fetch_validation_error_when_no_fetch_option_enabled(tenant: dict) -> No
 
 
 def test_fetch_http_connection_error(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
-    def raise_connection_error(url: str) -> None:
+    def raise_connection_error(url: str, **kwargs) -> None:
         raise requests.ConnectionError("connection refused")
 
     monkeypatch.setattr("core.fetch_service.requests.get", raise_connection_error)
@@ -109,7 +110,7 @@ def test_fetch_http_connection_error(monkeypatch: pytest.MonkeyPatch, tenant: di
 def test_fetch_http_error_status(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
     response: Mock = mock_response("")
     response.raise_for_status.side_effect = requests.HTTPError("500 Server Error")
-    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: response)
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url, **kwargs: response)
 
     result: dict = FetchService().fetch(tenant)
 
@@ -119,7 +120,7 @@ def test_fetch_http_error_status(monkeypatch: pytest.MonkeyPatch, tenant: dict) 
 
 
 def test_fetch_invalid_json_response(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
-    monkeypatch.setattr("core.fetch_service.requests.get", lambda url: mock_response("not valid json"))
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url, **kwargs: mock_response("not valid json"))
 
     result: dict = FetchService().fetch(tenant)
 
@@ -128,3 +129,57 @@ def test_fetch_invalid_json_response(monkeypatch: pytest.MonkeyPatch, tenant: di
     assert "Invalid JSON response from server" in result["error"]
     assert "<br>" not in result["error"]
     assert "\n" in result["error"]
+
+
+def test_fetch_verifies_ssl_certificate_by_default(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    payload: dict = {"script_version": 2, "group_scripts": {"script_folders": [], "scripts": []}}
+    get: Mock = Mock(return_value=mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", get)
+
+    FetchService().fetch(tenant)
+
+    assert get.call_args.kwargs["verify"] is True
+
+
+def test_fetch_sends_crmfetch_version_user_agent_by_default(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    payload: dict = {"script_version": 2, "group_scripts": {"script_folders": [], "scripts": []}}
+    get: Mock = Mock(return_value=mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", get)
+
+    FetchService().fetch(tenant)
+
+    assert get.call_args.kwargs["headers"]["User-Agent"] == f"crmfetch/{get_current_version()}"
+
+
+def test_fetch_sends_custom_user_agent(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    payload: dict = {"script_version": 2, "group_scripts": {"script_folders": [], "scripts": []}}
+    get: Mock = Mock(return_value=mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", get)
+
+    FetchService().fetch(tenant, user_agent="foobar")
+
+    assert get.call_args.kwargs["headers"]["User-Agent"] == "foobar"
+
+
+def test_fetch_ignore_ssl_certificate_error_disables_verification(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    payload: dict = {"script_version": 2, "group_scripts": {"script_folders": [], "scripts": []}}
+    get: Mock = Mock(return_value=mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", get)
+
+    result: dict = FetchService().fetch(tenant, ignore_ssl_certificate_error=True)
+
+    assert result["success"] is True
+    assert get.call_args.kwargs["verify"] is False
+
+
+def test_fetch_ssl_error_suggests_ignore_flag(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    def raise_ssl_error(url: str, **kwargs) -> None:
+        raise requests.exceptions.SSLError("certificate verify failed")
+
+    monkeypatch.setattr("core.fetch_service.requests.get", raise_ssl_error)
+
+    result: dict = FetchService().fetch(tenant)
+
+    assert result["success"] is False
+    assert "SSL certificate verification failed" in result["error"]
+    assert "--ignore-ssl-certificate-error" in result["error"]
