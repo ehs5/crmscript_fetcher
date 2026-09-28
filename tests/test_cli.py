@@ -369,6 +369,24 @@ def test_show_prints_human_readable_summary_by_default(tenant_service: Mock, cap
     assert "ID:                5" in out
     assert "Name:              Acme" in out
     assert "https://acme.example" in out
+    assert "secret" not in out
+
+
+def test_show_reveal_key_prints_the_key(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
+    tenant_service.get_tenant_by_id.return_value = {
+        "id": 5,
+        "tenant_name": "Acme",
+        "url": "https://acme.example",
+        "include_id": "acme-inc",
+        "key": "secret",
+        "local_directory": "/tmp/acme",
+        "fetch_options": {"fetch_scripts": True},
+    }
+
+    exit_code: int = run(["show", "5", "--reveal-key"])
+
+    assert exit_code == 0
+    assert "Script key:        secret" in capsys.readouterr().out
 
 
 def test_show_prints_full_tenant_as_json_with_json_flag(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
@@ -386,7 +404,28 @@ def test_show_prints_full_tenant_as_json_with_json_flag(tenant_service: Mock, ca
 
     assert exit_code == 0
     tenant_service.get_tenant_by_id.assert_called_once_with(5)
-    assert json.loads(capsys.readouterr().out) == tenant
+    assert json.loads(capsys.readouterr().out) == {**tenant, "key": "*** (use --reveal-key to show)"}
+
+
+def test_list_json_masks_keys_unless_revealed(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 1, "tenant_name": "Acme", "url": "https://acme.example", "key": "secret"}
+    ]
+
+    assert run(["list", "--json"]) == 0
+    assert "secret" not in capsys.readouterr().out
+
+    assert run(["list", "--json", "--reveal-key"]) == 0
+    assert json.loads(capsys.readouterr().out)[0]["key"] == "secret"
+
+
+def test_search_json_masks_keys(tenant_service: Mock, capsys: pytest.CaptureFixture) -> None:
+    tenant_service.search_tenants.return_value = [
+        {"id": 1, "tenant_name": "Acme", "url": "https://acme.example", "key": "secret"}
+    ]
+
+    assert run(["search", "acme", "--json"]) == 0
+    assert "secret" not in capsys.readouterr().out
 
 
 def test_show_unknown_id_exits_one(tenant_service: Mock) -> None:

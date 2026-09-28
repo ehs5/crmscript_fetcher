@@ -31,6 +31,18 @@ tenant_service: TenantService | None = None
 fetch_service = FetchService()
 
 
+def _hide_key(tenant: dict, reveal_key: bool) -> dict:
+    """
+    Returns the tenant with its script key replaced by a placeholder, so the
+    key doesn't end up in terminal scrollback, screenshares or pasted output.
+    Returns it unchanged when reveal_key is set or there is no key to hide.
+    """
+    if reveal_key or not tenant.get("key"):
+        return tenant
+
+    return {**tenant, "key": "*** (use --reveal-key to show)"}
+
+
 def _tenant_summary(tenant: dict) -> str:
     """Formats a tenant as a single human-readable line: id, name, url."""
     return f"{tenant['id']}: {tenant['tenant_name']} ({tenant['url']})"
@@ -80,13 +92,16 @@ def _resolve_tenant_service() -> TenantService | None:
 
 
 @app.command(name="list")
-def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False) -> int:
+def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False,
+                 reveal_key: bool = False) -> int:
     """Lists all configured tenants.
 
     Parameters
     ----------
     json_output: bool
         Print the full tenant objects as JSON instead of a human-readable summary.
+    reveal_key: bool
+        Print the script keys instead of masking them.
     """
     service: TenantService | None = _resolve_tenant_service()
     if service is None:
@@ -95,7 +110,7 @@ def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json
     tenants: list[dict] = service.get_all_tenants()
 
     if json_output:
-        print(json.dumps(tenants, indent=4, ensure_ascii=False))
+        print(json.dumps([_hide_key(tenant, reveal_key) for tenant in tenants], indent=4, ensure_ascii=False))
         return 0
 
     for tenant in tenants:
@@ -104,7 +119,8 @@ def list_tenants(*, json_output: Annotated[bool, cyclopts.Parameter(name="--json
 
 
 @app.command(name="search")
-def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False) -> int:
+def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False,
+                   reveal_key: bool = False) -> int:
     """Searches tenants by name or URL substring, case-insensitive.
 
     Parameters
@@ -113,6 +129,8 @@ def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Paramete
         Substring to match against a tenant's name or URL.
     json_output: bool
         Print the full tenant objects as JSON instead of a human-readable summary.
+    reveal_key: bool
+        Print the script keys instead of masking them.
     """
     service: TenantService | None = _resolve_tenant_service()
     if service is None:
@@ -121,7 +139,7 @@ def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Paramete
     tenants: list[dict] = service.search_tenants(query)
 
     if json_output:
-        print(json.dumps(tenants, indent=4, ensure_ascii=False))
+        print(json.dumps([_hide_key(tenant, reveal_key) for tenant in tenants], indent=4, ensure_ascii=False))
         return 0
 
     for tenant in tenants:
@@ -130,7 +148,8 @@ def search_tenants(query: str, *, json_output: Annotated[bool, cyclopts.Paramete
 
 
 @app.command(name="show")
-def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False) -> int:
+def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Parameter(name="--json")] = False,
+                reveal_key: bool = False) -> int:
     """Prints one tenant's details.
 
     Parameters
@@ -140,6 +159,8 @@ def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Paramet
         to see available IDs.
     json_output: bool
         Print the full tenant object as JSON instead of a human-readable summary.
+    reveal_key: bool
+        Print the script key instead of masking it.
     """
     service: TenantService | None = _resolve_tenant_service()
     if service is None:
@@ -150,6 +171,8 @@ def show_tenant(tenant_id: int, *, json_output: Annotated[bool, cyclopts.Paramet
     except ValueError as e:
         _print_error(str(e))
         return 1
+
+    tenant = _hide_key(tenant, reveal_key)
 
     if json_output:
         print(json.dumps(tenant, indent=4, ensure_ascii=False))
