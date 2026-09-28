@@ -29,6 +29,22 @@ class FetchService:
 
         return script_url
 
+    @staticmethod
+    def mask_key(text: str, tenant: dict) -> str:
+        """Replaces the tenant's script key with a placeholder everywhere it occurs in text."""
+        key = str(tenant.get("key") or "")
+        if not key:
+            return text
+
+        return text.replace(key, "***")
+
+    @classmethod
+    def fail(cls, error: str, tenant: dict) -> tuple[None, str]:
+        """Prints and returns a fetch error, with the tenant's script key masked out."""
+        error = cls.mask_key(error, tenant)
+        print(error)
+        return None, error
+
     def get_superoffice_data(self, tenant: dict, ignore_ssl_certificate_error: bool = False,
                              user_agent: str = DEFAULT_USER_AGENT) -> tuple[dict | None, str]:
         """
@@ -38,7 +54,7 @@ class FetchService:
         user_agent is sent as the request's User-Agent header.
         """
         script_url = self.build_script_url(tenant)
-        log(f"Getting JSON data from SuperOffice using endpoint: {script_url}")
+        log(f"Getting JSON data from SuperOffice using endpoint: {self.mask_key(script_url, tenant)}")
 
         if ignore_ssl_certificate_error:
             log("Warning: Ignoring SSL certificate errors for this request")
@@ -58,24 +74,19 @@ class FetchService:
         except requests.exceptions.SSLError as e:
             error = (f"SSL certificate verification failed: {str(e)}\n\n"
                      f"If you trust this server, you can retry with: crmfetch fetch <id> --ignore-ssl-certificate-error")
-            print(error)
-            return None, error
+            return self.fail(error, tenant)
         except requests.ConnectionError as e:
             error = f"Failed to connect to SuperOffice: {str(e)}"
-            print(error)
-            return None, error
+            return self.fail(error, tenant)
         except requests.Timeout as e:
             error = f"Request to SuperOffice timed out: {str(e)}"
-            print(error)
-            return None, error
+            return self.fail(error, tenant)
         except requests.HTTPError as e:
             error = f"HTTP error occurred: {str(e)}"
-            print(error)
-            return None, error
+            return self.fail(error, tenant)
         except requests.RequestException as e:
             error = f"Failed to fetch data from SuperOffice: {str(e)}"
-            print(error)
-            return None, error
+            return self.fail(error, tenant)
 
         # Parse JSON and return data as dictionary from method
         try:
@@ -86,8 +97,7 @@ class FetchService:
             error: str = (f"Invalid JSON response from server\n\nContacting URL: {script_url}\n\n"
                           f"{str(e)}\n\n"
                           f"GET returned body:\n{response.text}")
-            print(error)
-            return None, error
+            return self.fail(error, tenant)
 
     @staticmethod
     def validate_tenant(tenant: dict) -> str:

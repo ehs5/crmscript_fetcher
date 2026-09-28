@@ -13,7 +13,7 @@ import pytest
 import requests
 
 from core.fetch_service import FetchService
-from core.utility import get_current_version
+from core.utility import get_current_version, set_verbose
 
 
 @pytest.fixture
@@ -129,6 +129,53 @@ def test_fetch_invalid_json_response(monkeypatch: pytest.MonkeyPatch, tenant: di
     assert "Invalid JSON response from server" in result["error"]
     assert "<br>" not in result["error"]
     assert "\n" in result["error"]
+
+
+def test_fetch_invalid_json_response_masks_key(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url, **kwargs: mock_response("not valid json"))
+
+    result: dict = FetchService().fetch(tenant)
+
+    assert tenant["key"] not in result["error"]
+    assert "key=***" in result["error"]
+
+
+def test_fetch_connection_error_masks_key_in_url(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    def raise_connection_error(url: str, **kwargs) -> None:
+        raise requests.ConnectionError(f"Max retries exceeded with url: {url}")
+
+    monkeypatch.setattr("core.fetch_service.requests.get", raise_connection_error)
+
+    result: dict = FetchService().fetch(tenant)
+
+    assert tenant["key"] not in result["error"]
+    assert "key=***" in result["error"]
+
+
+def test_fetch_does_not_log_key_in_verbose_mode(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
+                                                tenant: dict) -> None:
+    payload: dict = {"script_version": 2, "group_scripts": {"script_folders": [], "scripts": []}}
+    monkeypatch.setattr("core.fetch_service.requests.get", lambda url, **kwargs: mock_response(json.dumps(payload)))
+    set_verbose(True)
+
+    try:
+        FetchService().fetch(tenant)
+    finally:
+        set_verbose(False)
+
+    output: str = capsys.readouterr().out
+    assert tenant["key"] not in output
+    assert "key=***" in output
+
+
+def test_fetch_still_sends_the_real_key_to_superoffice(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
+    payload: dict = {"script_version": 2, "group_scripts": {"script_folders": [], "scripts": []}}
+    get: Mock = Mock(return_value=mock_response(json.dumps(payload)))
+    monkeypatch.setattr("core.fetch_service.requests.get", get)
+
+    FetchService().fetch(tenant)
+
+    assert f"key={tenant['key']}" in get.call_args.args[0]
 
 
 def test_fetch_verifies_ssl_certificate_by_default(monkeypatch: pytest.MonkeyPatch, tenant: dict) -> None:
