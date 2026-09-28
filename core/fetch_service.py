@@ -7,7 +7,6 @@ from core.utility import get_current_version, log
 
 CURRENT_CRMSCRIPT_VERSION = 2
 DEFAULT_USER_AGENT = f"crmfetch/{get_current_version()}"
-MASKED_KEY = "***"
 
 class FetchService:
     """
@@ -37,7 +36,7 @@ class FetchService:
         if not key:
             return text
 
-        return text.replace(key, MASKED_KEY)
+        return text.replace(key, "***")
 
     @classmethod
     def fail(cls, error: str, tenant: dict) -> tuple[None, str]:
