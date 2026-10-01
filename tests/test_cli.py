@@ -209,7 +209,9 @@ def test_fetch_all_flag_is_a_usage_error_not_fetch_everything(
 
 def test_add_calls_add_tenant_with_only_the_five_core_fields(tenant_service: Mock) -> None:
     tenant_service.add_tenant.return_value = {"id": 1, "tenant_name": "Acme"}
-    tenant_service.get_all_tenants.return_value = [{"id": 1, "tenant_name": "Acme"}]
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 1, "tenant_name": "Existing", "url": "https://existing.example"}
+    ]
 
     exit_code: int = run([
         "add",
@@ -232,7 +234,7 @@ def test_add_calls_add_tenant_with_only_the_five_core_fields(tenant_service: Moc
 
 def test_add_backfills_default_fetch_options_via_core_helper(tenant_service: Mock) -> None:
     tenant_service.add_tenant.return_value = {"id": 1, "tenant_name": "Acme"}
-    all_tenants: list[dict] = [{"id": 1, "tenant_name": "Acme"}]
+    all_tenants: list[dict] = [{"id": 1, "tenant_name": "Existing", "url": "https://existing.example"}]
     tenant_service.get_all_tenants.return_value = all_tenants
 
     run([
@@ -254,8 +256,55 @@ def test_add_missing_required_flag_is_a_usage_error(tenant_service: Mock) -> Non
     tenant_service.add_tenant.assert_not_called()
 
 
+def test_add_duplicate_name_case_insensitive_rejects_without_saving(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 2, "tenant_name": "Beta", "url": "https://beta.example"}
+    ]
+
+    exit_code: int = run([
+        "add",
+        "--name", "beta",
+        "--url", "https://other.example",
+        "--include-id", "acme-inc",
+        "--key", "secret",
+        "--local-dir", "/tmp/other",
+    ])
+
+    assert exit_code == 1
+    tenant_service.add_tenant.assert_not_called()
+    # A rejected add must not touch the settings file via the backfill helper either.
+    tenant_service.add_missing_fetch_options.assert_not_called()
+    assert "already used by tenant 2" in capsys.readouterr().err
+
+
+def test_add_same_url_warns_on_stderr_but_still_saves(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 2, "tenant_name": "Beta", "url": "https://beta.example"}
+    ]
+    tenant_service.add_tenant.return_value = {"id": 3, "tenant_name": "Acme"}
+
+    exit_code: int = run([
+        "add",
+        "--name", "Acme",
+        "--url", "https://BETA.example/",
+        "--include-id", "acme-inc",
+        "--key", "secret",
+        "--local-dir", "/tmp/acme",
+    ])
+
+    assert exit_code == 0
+    tenant_service.add_tenant.assert_called_once()
+    err: str = capsys.readouterr().err
+    assert "Warning" in err
+    assert "already uses this URL" in err
+
+
 def test_edit_merges_specified_fields_onto_existing_tenant(tenant_service: Mock) -> None:
-    tenant_service.get_tenant_by_id.return_value = {
+    tenant: dict = {
         "id": 5,
         "tenant_name": "Acme",
         "url": "https://acme.example",
@@ -263,6 +312,8 @@ def test_edit_merges_specified_fields_onto_existing_tenant(tenant_service: Mock)
         "key": "secret",
         "local_directory": "/tmp/acme",
     }
+    tenant_service.get_tenant_by_id.return_value = tenant
+    tenant_service.get_all_tenants.return_value = [tenant]
 
     exit_code: int = run(["edit", "5", "--url", "https://new.example"])
 
@@ -287,6 +338,7 @@ def test_edit_with_no_flags_leaves_all_fields_unchanged(tenant_service: Mock) ->
         "local_directory": "/tmp/acme",
     }
     tenant_service.get_tenant_by_id.return_value = dict(tenant)
+    tenant_service.get_all_tenants.return_value = [dict(tenant)]
 
     exit_code: int = run(["edit", "5"])
 
@@ -301,6 +353,60 @@ def test_edit_unknown_id_exits_one_without_calling_update(tenant_service: Mock) 
 
     assert exit_code == 1
     tenant_service.update_tenant.assert_not_called()
+
+
+def test_edit_duplicate_name_case_insensitive_rejects_without_calling_update(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.get_tenant_by_id.return_value = {
+        "id": 5, "tenant_name": "Acme", "url": "https://acme.example"
+    }
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 2, "tenant_name": "Beta", "url": "https://beta.example"},
+        {"id": 5, "tenant_name": "Acme", "url": "https://acme.example"},
+    ]
+
+    exit_code: int = run(["edit", "5", "--name", "beta"])
+
+    assert exit_code == 1
+    tenant_service.update_tenant.assert_not_called()
+    assert "already used by tenant 2" in capsys.readouterr().err
+
+
+def test_edit_excludes_self_from_name_and_url_checks(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant: dict = {
+        "id": 5, "tenant_name": "Acme", "url": "https://acme.example"
+    }
+    tenant_service.get_tenant_by_id.return_value = dict(tenant)
+    tenant_service.get_all_tenants.return_value = [dict(tenant)]
+
+    exit_code: int = run(["edit", "5", "--name", "ACME", "--url", "https://acme.example/"])
+
+    assert exit_code == 0
+    tenant_service.update_tenant.assert_called_once()
+    assert "Warning" not in capsys.readouterr().err
+
+
+def test_edit_same_url_warns_on_stderr_but_still_saves(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.get_tenant_by_id.return_value = {
+        "id": 5, "tenant_name": "Acme", "url": "https://acme.example"
+    }
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 2, "tenant_name": "Beta", "url": "https://beta.example"},
+        {"id": 5, "tenant_name": "Acme", "url": "https://acme.example"},
+    ]
+
+    exit_code: int = run(["edit", "5", "--url", "https://BETA.example/"])
+
+    assert exit_code == 0
+    tenant_service.update_tenant.assert_called_once()
+    err: str = capsys.readouterr().err
+    assert "Warning" in err
+    assert "already uses this URL" in err
 
 
 def test_delete_without_yes_prints_tenant_and_does_not_delete(

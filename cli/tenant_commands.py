@@ -10,7 +10,7 @@ from typing import Annotated
 import cyclopts
 from rich.console import Console
 
-from cli.app import app, _print_error
+from cli.app import app, _print_error, _print_warning
 from cli.cli_config import CliConfig
 from core.fetch_service import DEFAULT_USER_AGENT, FetchService
 from core.tenant_service import TenantService
@@ -77,6 +77,37 @@ def _resolve_tenant_service() -> TenantService | None:
 
     tenant_service = TenantService(active_path)
     return tenant_service
+
+
+# The uniqueness guards live here, not in TenantService: the GUI's save paths
+# call the same add_tenant/update_tenant and must keep accepting what they
+# accept today.
+def _find_duplicate_name(all_tenants: list[dict], name: str, exclude_id: int | None = None) -> dict | None:
+    """
+    Returns the first tenant whose name equals name, case-insensitively,
+    skipping the tenant with exclude_id (its own id when editing).
+    """
+    lowered_name: str = name.lower()
+    for tenant in all_tenants:
+        if exclude_id is not None and tenant["id"] == exclude_id:
+            continue
+        if tenant["tenant_name"].lower() == lowered_name:
+            return tenant
+    return None
+
+
+def _find_same_url(all_tenants: list[dict], url: str, exclude_id: int | None = None) -> dict | None:
+    """
+    Returns the first tenant whose URL equals url, ignoring case and
+    trailing slashes, skipping the tenant with exclude_id.
+    """
+    normalized_url: str = url.lower().rstrip("/")
+    for tenant in all_tenants:
+        if exclude_id is not None and tenant["id"] == exclude_id:
+            continue
+        if tenant["url"].lower().rstrip("/") == normalized_url:
+            return tenant
+    return None
 
 
 @app.command(name="list")
@@ -257,6 +288,19 @@ def add_tenant(
         "local_directory": local_dir,
     }
 
+    all_tenants: list[dict] = service.get_all_tenants()
+
+    duplicate: dict | None = _find_duplicate_name(all_tenants, name)
+    if duplicate is not None:
+        _print_error(f"Tenant name \"{duplicate['tenant_name']}\" is already used by tenant {duplicate['id']}.")
+        return 1
+
+    same_url: dict | None = _find_same_url(all_tenants, url)
+    if same_url is not None:
+        _print_warning(
+            f"Warning: tenant {same_url['id']} ({same_url['tenant_name']}) already uses this URL; saving anyway."
+        )
+
     try:
         added: dict = service.add_tenant(new_tenant)
     except Exception as e:
@@ -320,6 +364,19 @@ def edit_tenant(
         tenant["key"] = key
     if local_dir is not None:
         tenant["local_directory"] = local_dir
+
+    all_tenants: list[dict] = service.get_all_tenants()
+
+    duplicate: dict | None = _find_duplicate_name(all_tenants, tenant["tenant_name"], exclude_id=tenant_id)
+    if duplicate is not None:
+        _print_error(f"Tenant name \"{duplicate['tenant_name']}\" is already used by tenant {duplicate['id']}.")
+        return 1
+
+    same_url: dict | None = _find_same_url(all_tenants, tenant["url"], exclude_id=tenant_id)
+    if same_url is not None:
+        _print_warning(
+            f"Warning: tenant {same_url['id']} ({same_url['tenant_name']}) already uses this URL; saving anyway."
+        )
 
     try:
         service.update_tenant(tenant)
