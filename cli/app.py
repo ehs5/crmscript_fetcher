@@ -95,6 +95,11 @@ def _print_error(message: str) -> None:
     print(message, file=sys.stderr)
 
 
+def _print_warning(message: str) -> None:
+    """Prints a warning message to stderr."""
+    print(message, file=sys.stderr)
+
+
 # Imported for their registration side effects (each decorates commands onto
 # `app` above) - must happen after `app`/`_print_error` are defined, since
 # both modules import them back from here.
