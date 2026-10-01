@@ -256,6 +256,53 @@ def test_add_missing_required_flag_is_a_usage_error(tenant_service: Mock) -> Non
     tenant_service.add_tenant.assert_not_called()
 
 
+def test_add_duplicate_name_case_insensitive_rejects_without_saving(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 2, "tenant_name": "Beta", "url": "https://beta.example"}
+    ]
+
+    exit_code: int = run([
+        "add",
+        "--name", "beta",
+        "--url", "https://other.example",
+        "--include-id", "acme-inc",
+        "--key", "secret",
+        "--local-dir", "/tmp/other",
+    ])
+
+    assert exit_code == 1
+    tenant_service.add_tenant.assert_not_called()
+    # A rejected add must not touch the settings file via the backfill helper either.
+    tenant_service.add_missing_fetch_options.assert_not_called()
+    assert "already used by tenant 2" in capsys.readouterr().err
+
+
+def test_add_same_url_warns_on_stderr_but_still_saves(
+    tenant_service: Mock, capsys: pytest.CaptureFixture
+) -> None:
+    tenant_service.get_all_tenants.return_value = [
+        {"id": 2, "tenant_name": "Beta", "url": "https://beta.example"}
+    ]
+    tenant_service.add_tenant.return_value = {"id": 3, "tenant_name": "Acme"}
+
+    exit_code: int = run([
+        "add",
+        "--name", "Acme",
+        "--url", "https://BETA.example/",
+        "--include-id", "acme-inc",
+        "--key", "secret",
+        "--local-dir", "/tmp/acme",
+    ])
+
+    assert exit_code == 0
+    tenant_service.add_tenant.assert_called_once()
+    err: str = capsys.readouterr().err
+    assert "Warning" in err
+    assert "already uses this URL" in err
+
+
 def test_edit_merges_specified_fields_onto_existing_tenant(tenant_service: Mock) -> None:
     tenant: dict = {
         "id": 5,
